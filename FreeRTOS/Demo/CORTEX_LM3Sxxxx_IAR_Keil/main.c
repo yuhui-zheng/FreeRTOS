@@ -72,7 +72,7 @@ default the WEB server is excluded to keep the compiled code size under the 32K
 limit imposed by the KickStart version of the IAR compiler.  The graphics
 libraries take up a lot of ROM space, hence including the graphics libraries
 and the TCP/IP stack together cannot be accommodated with the 32K size limit. */
-#define mainINCLUDE_WEB_SERVER		0
+#define mainINCLUDE_WEB_SERVER		1
 
 
 /* Standard includes. */
@@ -211,7 +211,7 @@ int main( void )
 	xOLEDQueue = xQueueCreate( mainOLED_QUEUE_SIZE, sizeof( xOLEDMessage ) );
 
 	/* Start the standard demo tasks. */
-	vStartGenericQueueTasks( mainGEN_QUEUE_TASK_PRIORITY );
+	/*vStartGenericQueueTasks( mainGEN_QUEUE_TASK_PRIORITY );
 	vStartInterruptQueueTasks();
 	vStartRecursiveMutexTasks();
 	vCreateBlockTimeTasks();
@@ -221,7 +221,7 @@ int main( void )
 	vStartQueueSetTasks();
 	vStartEventGroupTasks();
 	vStartMessageBufferTasks( configMINIMAL_STACK_SIZE );
-	vStartStreamBufferTasks();
+	vStartStreamBufferTasks();*/
 
 	/* Exclude some tasks if using the kickstart version to ensure we stay within
 	the 32K code size limit. */
@@ -242,7 +242,7 @@ int main( void )
 	/* The suicide tasks must be created last as they need to know how many
 	tasks were running prior to their creation in order to ascertain whether
 	or not the correct/expected number of tasks are running at any given time. */
-	vCreateSuicidalTasks( mainCREATOR_TASK_PRIORITY );
+	//vCreateSuicidalTasks( mainCREATOR_TASK_PRIORITY );
 
 	/* Uncomment the following line to configure the high frequency interrupt
 	used to measure the interrupt jitter time.
@@ -282,80 +282,7 @@ void prvSetupHardware( void )
 
 void vApplicationTickHook( void )
 {
-static xOLEDMessage xMessage = { "PASS" };
-static unsigned long ulTicksSinceLastDisplay = 0;
-portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
-	/* Called from every tick interrupt.  Have enough ticks passed to make it
-	time to perform our health status check again? */
-	ulTicksSinceLastDisplay++;
-	if( ulTicksSinceLastDisplay >= mainCHECK_DELAY )
-	{
-		ulTicksSinceLastDisplay = 0;
-
-		/* Has an error been found in any task? */
-		if( xAreStreamBufferTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN STRM";
-		}
-		else if( xAreMessageBufferTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN MSG";
-		}
-		if( xAreGenericQueueTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN GEN Q";
-		}
-	    else if( xIsCreateTaskStillRunning() != pdTRUE )
-	    {
-	        xMessage.pcMessage = "ERROR IN CREATE";
-	    }
-		else if( xAreIntQueueTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN INT QUEUE";
-		}
-		else if( xAreBlockTimeTestTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN BLOCK TIME";
-		}
-		else if( xAreSemaphoreTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN SEMAPHORE";
-		}
-		else if( xArePollingQueuesStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN POLL Q";
-		}
-		else if( xAreQueuePeekTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN PEEK Q";
-		}
-		else if( xAreRecursiveMutexTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN REC MUTEX";
-		}
-		else if( xAreQueueSetTasksStillRunning() != pdPASS )
-		{
-			xMessage.pcMessage = "ERROR IN Q SET";
-		}
-		else if( xAreEventGroupTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN EVNT GRP";
-		}
-
-		configASSERT( strcmp( ( const char * ) xMessage.pcMessage, "PASS" ) == 0 );
-
-		/* Send the message to the OLED gatekeeper for display. */
-		xHigherPriorityTaskWoken = pdFALSE;
-		xQueueSendFromISR( xOLEDQueue, &xMessage, &xHigherPriorityTaskWoken );
-	}
-
-	/* Write to a queue that is in use as part of the queue set demo to
-	demonstrate using queue sets from an ISR. */
-	vQueueSetAccessQueueSetFromISR();
-
-	/* Call the event group ISR tests. */
-	vPeriodicEventGroupsProcessing();
 }
 /*-----------------------------------------------------------*/
 
