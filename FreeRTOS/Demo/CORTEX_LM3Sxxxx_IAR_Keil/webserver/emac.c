@@ -222,12 +222,19 @@ unsigned long ulLength;
 unsigned long *pulBuffer;
 static unsigned long ulNextRxBuffer = 0;
 
+const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
+
 	for( ;; )
 	{
 		/* Wait for something to do. */
-		xSemaphoreTake( xMACInterruptSemaphore, portMAX_DELAY );
+		//xSemaphoreTake( xMACInterruptSemaphore, portMAX_DELAY );
 
-		while( ( ulInt = ( EthernetIntStatus( ETH_BASE, pdFALSE ) & ETH_INT_RX ) ) != 0 )
+		//while( ( ulInt = ( EthernetIntStatus( ETH_BASE, pdFALSE ) & ETH_INT_RX ) ) != 0 )
+		
+		/* Instead of waiting for interrupt, polling number of packets register. 
+		   The MACRIS/MACIACK is not emulated correctly in QEMU, that enabling/disabling interrupt doesn't matter here. 
+		*/
+		while ( EthernetPacketAvail(ETH_BASE) != 0 )
 		{
 			ulLength = HWREG( ETH_BASE + MAC_O_DATA );
 
@@ -272,7 +279,10 @@ static unsigned long ulNextRxBuffer = 0;
 			}
 		}
 
-		EthernetIntEnable( ETH_BASE, ETH_INT_RX );
+		//EthernetIntEnable( ETH_BASE, ETH_INT_RX );
+		
+		/* Wait some time before next check. This is to avoid busy waiting. */
+		vTaskDelay( xDelay );	
 
 		( void ) ulInt;
 	}
