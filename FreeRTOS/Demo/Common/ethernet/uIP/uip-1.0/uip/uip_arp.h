@@ -121,6 +121,9 @@ void uip_arp_timer(void);
  * \addtogroup uipconffunc
  * @{
  */
+ 
+ /* This generates test packet for test purpose only. */
+ void uip_customed_packet(void);
 
 
 /**

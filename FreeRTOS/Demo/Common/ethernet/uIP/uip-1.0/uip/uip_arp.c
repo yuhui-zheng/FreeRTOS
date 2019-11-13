@@ -435,5 +435,34 @@ uip_arp_out(void)
 }
 /*-----------------------------------------------------------------------------------*/
 
+void
+uip_customed_packet(void)
+{
+	
+	// manually input MAC address
+	u8_t macAddr[6] = {0x52, 0x54, 0x00, 0xAA, 0xBB, 0xCC};
+	
+	// Since nothing is in network buffer, we try to intiiate some traffic. 
+  uip_len = 0;
+	
+  /* The reply opcode is 2. */
+  BUF->opcode = HTONS(2);
+
+  memcpy(BUF->dhwaddr.addr, BUF->shwaddr.addr, 6);
+  memcpy(BUF->shwaddr.addr, macAddr, 6);
+  memcpy(BUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
+  memcpy(BUF->ethhdr.dest.addr, BUF->dhwaddr.addr, 6);
+
+  BUF->dipaddr[0] = BUF->sipaddr[0];
+  BUF->dipaddr[1] = BUF->sipaddr[1];
+  BUF->sipaddr[0] = uip_hostaddr[0];
+  BUF->sipaddr[1] = uip_hostaddr[1];
+
+  BUF->ethhdr.type = HTONS(UIP_ETHTYPE_ARP);
+  uip_len = sizeof(struct arp_hdr);
+
+  return;
+}
+
 /** @} */
 /** @} */
