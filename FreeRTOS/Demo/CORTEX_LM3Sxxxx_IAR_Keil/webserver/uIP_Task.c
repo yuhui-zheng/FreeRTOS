@@ -59,10 +59,10 @@ struct timer {
 /*-----------------------------------------------------------*/
 
 /* IP address configuration. */
-#define uipIP_ADDR0		172
-#define uipIP_ADDR1		25
-#define uipIP_ADDR2		218
-#define uipIP_ADDR3		19	
+#define uipIP_ADDR0		10
+#define uipIP_ADDR1		129
+#define uipIP_ADDR2		88
+#define uipIP_ADDR3		249	
 
 /* How long to wait before attempting to connect the MAC again. */
 #define uipINIT_WAIT    100
@@ -151,6 +151,10 @@ extern void ( vEMAC_ISR )( void );
 		/* Is there received data ready to be processed? */
 		uip_len = uiGetEMACRxData( uip_buf );
 		
+		/* Send something on purpose. So that we see the traffic. */
+		//uip_customed_packet();
+		//prvENET_Send();
+		
 		if( uip_len > 0 )
 		{
 			/* Standard uIP loop taken from the uIP manual. */
@@ -236,15 +240,22 @@ unsigned char pucMACArray[8];
 struct uip_eth_addr xAddr;
 
 	/* Get the device MAC address from flash */
-    FlashUserGet(&ulUser0, &ulUser1);
+    //FlashUserGet(&ulUser0, &ulUser1);
 
 	/* Convert the MAC address from flash into sequence of bytes. */
-    pucMACArray[0] = ((ulUser0 >>  0) & 0xff);
+    /*pucMACArray[0] = ((ulUser0 >>  0) & 0xff);
     pucMACArray[1] = ((ulUser0 >>  8) & 0xff);
     pucMACArray[2] = ((ulUser0 >> 16) & 0xff);
     pucMACArray[3] = ((ulUser1 >>  0) & 0xff);
     pucMACArray[4] = ((ulUser1 >>  8) & 0xff);
-    pucMACArray[5] = ((ulUser1 >> 16) & 0xff);
+    pucMACArray[5] = ((ulUser1 >> 16) & 0xff);*/
+
+    pucMACArray[0] = 0x52;
+    pucMACArray[1] = 0x54;
+    pucMACArray[2] = 0x00;
+    pucMACArray[3] = 0x12;
+    pucMACArray[4] = 0x34;
+    pucMACArray[5] = 0xAD;
 
 	/* Program the MAC address. */
     EthernetMACAddrSet(ETH_BASE, pucMACArray);
