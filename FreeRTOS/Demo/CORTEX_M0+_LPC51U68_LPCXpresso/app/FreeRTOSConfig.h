@@ -50,8 +50,6 @@ extern uint32_t SystemCoreClock;
 #define configCPU_CLOCK_HZ				( SystemCoreClock )
 #define configTICK_RATE_HZ				( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES			( 5 )
-#define configMINIMAL_STACK_SIZE		( ( unsigned short ) 120 )
-#define configTOTAL_HEAP_SIZE			( ( size_t ) ( 6500 ) )
 #define configMAX_TASK_NAME_LEN			( 5 )
 #define configUSE_TRACE_FACILITY		1
 #define configUSE_16_BIT_TICKS			0
@@ -68,6 +66,14 @@ extern uint32_t SystemCoreClock;
 /* Support various memory allocation. */
 #define configSUPPORT_STATIC_ALLOCATION   0
 #define configSUPPORT_DYNAMIC_ALLOCATION  1
+
+/* Heap and stack.
+ * The bytes specified in configTOTAL_HEAP_SIZE need to fit in to
+ * the first memory bank, which is of size 64kB in total. This 64kB
+ * consists of FreeRTOS heap, linker heap and also .bss etc. Thus
+ * FreeRTOS heap cannot take the entire 64kB.  */
+#define configMINIMAL_STACK_SIZE		( ( unsigned short ) 196 )
+#define configTOTAL_HEAP_SIZE			(  ( size_t ) ( 20 * 1024 ) )
 
 /* Software timer definitions. */
 #define configUSE_TIMERS				1

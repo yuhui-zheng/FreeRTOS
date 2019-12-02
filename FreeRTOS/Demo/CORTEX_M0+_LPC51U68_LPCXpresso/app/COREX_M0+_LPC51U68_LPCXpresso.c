@@ -52,6 +52,19 @@ or 0 to run the more comprehensive test and demo application. */
 #define mainCREATE_SIMPLE_BLINKY_DEMO_ONLY	1
 
 /*-----------------------------------------------------------*/
+typedef enum LED_STATE {
+	LED_RED_BLINK_ON = 1,
+	LED_RED_BLINK_OFF,
+	LED_GREEN_BLINK_ON,
+	LED_GREEN_BLINK_OFF,
+	LED_BLUE_BLINK_ON,
+	LED_BLUE_BLINK_OFF,
+} E_LED_STATE;
+
+/* Static variable to keep track of LED color.
+ red -> green -> blue -> red -> ...
+ This variable is not intended for multi threaded application. */
+static E_LED_STATE eLedState = LED_RED_BLINK_ON;
 
 /*
  * Perform any application specific hardware configuration.  The clocks,
@@ -108,14 +121,38 @@ int main(void)
 }
 
 /*-----------------------------------------------------------*/
-static int i = 0;
-
 void vMainToggleLED( void )
 {
-	// todo: toggle LED here.
-
-	PRINTF("LED %d.\r\n", i);
-	i++;
+	switch (eLedState)
+	{
+		case LED_RED_BLINK_ON:
+			LED_RED_ON();
+			eLedState = LED_RED_BLINK_OFF;
+			break;
+		case LED_RED_BLINK_OFF:
+			LED_RED_OFF();
+			eLedState = LED_GREEN_BLINK_ON;
+			break;
+		case LED_GREEN_BLINK_ON:
+			LED_GREEN_ON();
+			eLedState = LED_GREEN_BLINK_OFF;
+			break;
+		case LED_GREEN_BLINK_OFF:
+			LED_GREEN_OFF();
+			eLedState = LED_BLUE_BLINK_ON;
+			break;
+		case LED_BLUE_BLINK_ON:
+			LED_BLUE_ON();
+			eLedState = LED_BLUE_BLINK_OFF;
+			break;
+		case LED_BLUE_BLINK_OFF:
+			LED_BLUE_OFF();
+			eLedState = LED_RED_BLINK_ON;
+			break;
+		default:
+			/* Unexpected state. Let's reset to default color. */
+			eLedState = LED_RED_BLINK_ON;
+	}
 
 	return;
 }
@@ -124,13 +161,22 @@ void vMainToggleLED( void )
 
 static void prvSetupHardware( void )
 {
-  	/* Init board hardware. */
+	/* Enable clock for GPIO. */
+	CLOCK_EnableClock(kCLOCK_Gpio0);
+	CLOCK_EnableClock(kCLOCK_Gpio1);
+
+  	/* Initialize board hardware. */
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
-  	/* Init FSL debug console. */
+  	/* Initialize FSL debug console. */
     BOARD_InitDebugConsole();
+
+    /* Initialize tri-color LED. */
+    LED_RED_INIT(LOGIC_LED_OFF);
+    LED_GREEN_INIT(LOGIC_LED_OFF);
+    LED_BLUE_INIT(LOGIC_LED_OFF);
 
     return;
 }
@@ -140,7 +186,9 @@ static void prvSetupHardware( void )
 static void prvInitializeHeap( void )
 {
     static uint8_t ucHeap1[ configTOTAL_HEAP_SIZE ];
-    static uint8_t ucHeap2[ 32 * 1024 ] __attribute__( ( section( ".freertos_heap2" ) ) );
+
+    /* The second bank of SRAM is of 32kB in total. Let's assign half to FreeRTOS heap. */
+    static uint8_t ucHeap2[ 16 * 1024 ] __attribute__( ( section( ".freertos_heap2" ) ) );
 
     HeapRegion_t xHeapRegions[] =
     {
