@@ -181,9 +181,9 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Source/portable/MemMang/heap_5.c</name>
+			<name>Source/portable/MemMang/heap_4.c</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Source/portable/MemMang/heap_5.c</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/Source/portable/MemMang/heap_4.c</locationURI>
 		</link>
 		<link>
 			<name>Source/portable/GCC/ARM_CM0/port.c</name>

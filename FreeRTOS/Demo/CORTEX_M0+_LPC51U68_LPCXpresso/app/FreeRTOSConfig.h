@@ -66,7 +66,7 @@ extern uint32_t SystemCoreClock;
 #define configGENERATE_RUN_TIME_STATS	0
 
 /* Support various memory allocation. */
-#define configSUPPORT_STATIC_ALLOCATION   1
+#define configSUPPORT_STATIC_ALLOCATION   0
 #define configSUPPORT_DYNAMIC_ALLOCATION  1
 
 /* Software timer definitions. */
