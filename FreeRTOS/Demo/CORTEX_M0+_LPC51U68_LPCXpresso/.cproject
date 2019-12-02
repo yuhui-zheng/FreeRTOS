@@ -629,6 +629,7 @@
 &lt;memory id="RAM" size="96" type="RAM"/&gt;&#13;
 &lt;memoryInstance derived_from="Flash" driver="LPC51U6x_256K.cfx" edited="true" id="PROGRAM_FLASH" location="0x0" size="0x40000"/&gt;&#13;
 &lt;memoryInstance derived_from="RAM" edited="true" id="SRAM0" location="0x20000000" size="0x10000"/&gt;&#13;
+&lt;memoryInstance derived_from="RAM" edited="true" id="SRAM_00" location="0x40000000" size="0x8000"/&gt;&#13;
 &lt;/chip&gt;&#13;
 &lt;processor&gt;&#13;
 &lt;name gcc_name="cortex-m0plus"&gt;Cortex-M0+&lt;/name&gt;&#13;

@@ -59,6 +59,12 @@ or 0 to run the more comprehensive test and demo application. */
  */
 static void prvSetupHardware( void );
 
+/**
+ * Heap_5 is being used because the RAM is not contiguous, therefore the heap
+ * needs to be initialized.  See http://www.freertos.org/a00111.html
+ */
+static void prvInitializeHeap( void );
+
 /*
  * The hardware only has a single LED.  Simply toggle it.
  */
@@ -78,6 +84,12 @@ int main(void)
 	/* Prepare the hardware to run this demo. */
 	prvSetupHardware();
 
+	/* Initialize heap regions. */
+	prvInitializeHeap();
+
+	/* Show something on UART.
+    Serial port setup as baudrate: 115200, data: 8-bit, parity: none, stop bits: 1, flow control: none.
+    Terminal setup as receive: auto, transmit: CR+LF.*/
 	PRINTF("FreeRTOS demo.\n");
 
 	/* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
@@ -96,10 +108,16 @@ int main(void)
 }
 
 /*-----------------------------------------------------------*/
+static int i = 0;
 
 void vMainToggleLED( void )
 {
 	// todo: toggle LED here.
+
+	PRINTF("LED %d.\r\n", i);
+	i++;
+
+	return;
 }
 
 /*-----------------------------------------------------------*/
@@ -113,6 +131,27 @@ static void prvSetupHardware( void )
 
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
+
+    return;
+}
+
+/*-----------------------------------------------------------*/
+
+static void prvInitializeHeap( void )
+{
+    static uint8_t ucHeap1[ configTOTAL_HEAP_SIZE ];
+    static uint8_t ucHeap2[ 32 * 1024 ] __attribute__( ( section( ".freertos_heap2" ) ) );
+
+    HeapRegion_t xHeapRegions[] =
+    {
+        { ( unsigned char * ) ucHeap2, sizeof( ucHeap2 ) },
+        { ( unsigned char * ) ucHeap1, sizeof( ucHeap1 ) },
+        { NULL,                        0                 }
+    };
+
+    vPortDefineHeapRegions( xHeapRegions );
+
+    return;
 }
 
 /*-----------------------------------------------------------*/
