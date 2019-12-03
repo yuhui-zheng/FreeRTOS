@@ -84,18 +84,18 @@
 								<option id="gnu.c.compiler.option.preprocessor.preprocess.2124091695" name="Preprocess only (-E)" superClass="gnu.c.compiler.option.preprocessor.preprocess" useByScannerDiscovery="false"/>
 								<option id="gnu.c.compiler.option.preprocessor.undef.symbol.1255973730" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol" useByScannerDiscovery="false"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.554747206" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="../drivers"/>
+									<listOptionValue builtIn="false" value="../utilities"/>
+									<listOptionValue builtIn="false" value="../component/serial_manager"/>
+									<listOptionValue builtIn="false" value="../CMSIS"/>
+									<listOptionValue builtIn="false" value="../component/uart"/>
+									<listOptionValue builtIn="false" value="../device"/>
+									<listOptionValue builtIn="false" value="../component/lists"/>
 									<listOptionValue builtIn="false" value="../app"/>
 									<listOptionValue builtIn="false" value="../../../Source/include"/>
 									<listOptionValue builtIn="false" value="../../../Source/portable/GCC/ARM_CM0"/>
 									<listOptionValue builtIn="false" value="../../../Demo/Common/include"/>
 									<listOptionValue builtIn="false" value="../board"/>
-									<listOptionValue builtIn="false" value="../drivers"/>
-									<listOptionValue builtIn="false" value="../device"/>
-									<listOptionValue builtIn="false" value="../CMSIS"/>
-									<listOptionValue builtIn="false" value="../component/serial_manager"/>
-									<listOptionValue builtIn="false" value="../component/lists"/>
-									<listOptionValue builtIn="false" value="../component/uart"/>
-									<listOptionValue builtIn="false" value="../utilities"/>
 									<listOptionValue builtIn="false" value="../board/boards"/>
 								</option>
 								<option id="gnu.c.compiler.option.include.files.1058139061" name="Include files (-include)" superClass="gnu.c.compiler.option.include.files" useByScannerDiscovery="false"/>
@@ -135,18 +135,20 @@
 								<option id="com.crt.advproject.gas.arch.190053974" name="Architecture" superClass="com.crt.advproject.gas.arch" useByScannerDiscovery="false" value="com.crt.advproject.gas.target.cm0plus" valueType="enumerated"/>
 								<option id="gnu.both.asm.option.flags.crt.1565630100" name="Assembler flags" superClass="gnu.both.asm.option.flags.crt" useByScannerDiscovery="false"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.774097822" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../../Source"/>
-									<listOptionValue builtIn="false" value="../../../Demo/Common/include"/>
-									<listOptionValue builtIn="false" value="../app"/>
-									<listOptionValue builtIn="false" value="../board"/>
 									<listOptionValue builtIn="false" value="../drivers"/>
-									<listOptionValue builtIn="false" value="../device"/>
-									<listOptionValue builtIn="false" value="../CMSIS"/>
-									<listOptionValue builtIn="false" value="../component/serial_manager"/>
-									<listOptionValue builtIn="false" value="../component/lists"/>
-									<listOptionValue builtIn="false" value="../component/uart"/>
 									<listOptionValue builtIn="false" value="../utilities"/>
+									<listOptionValue builtIn="false" value="../component/serial_manager"/>
+									<listOptionValue builtIn="false" value="../CMSIS"/>
+									<listOptionValue builtIn="false" value="../component/uart"/>
+									<listOptionValue builtIn="false" value="../device"/>
+									<listOptionValue builtIn="false" value="../component/lists"/>
+									<listOptionValue builtIn="false" value="../app"/>
+									<listOptionValue builtIn="false" value="../../../Source/include"/>
+									<listOptionValue builtIn="false" value="../../../Source/portable/GCC/ARM_CM0"/>
+									<listOptionValue builtIn="false" value="../../../Demo/Common/include"/>
+									<listOptionValue builtIn="false" value="../board"/>
 									<listOptionValue builtIn="false" value="../board/boards"/>
+									<listOptionValue builtIn="false" value="../../../Source"/>
 								</option>
 								<option id="gnu.both.asm.option.warnings.nowarn.635232620" name="Suppress warnings (-W)" superClass="gnu.both.asm.option.warnings.nowarn" useByScannerDiscovery="false"/>
 								<option id="gnu.both.asm.option.version.1974290688" name="Announce version (-v)" superClass="gnu.both.asm.option.version" useByScannerDiscovery="false"/>
@@ -296,6 +298,7 @@
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="component"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="device"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="drivers"/>
+						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="startup"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="utilities"/>
 					</sourceEntries>
@@ -382,17 +385,22 @@
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.undef.symbol.2084709163" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol" useByScannerDiscovery="false"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.496019218" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="../drivers"/>
+									<listOptionValue builtIn="false" value="../utilities"/>
+									<listOptionValue builtIn="false" value="../component/serial_manager"/>
+									<listOptionValue builtIn="false" value="../CMSIS"/>
+									<listOptionValue builtIn="false" value="../component/uart"/>
+									<listOptionValue builtIn="false" value="../device"/>
+									<listOptionValue builtIn="false" value="../component/lists"/>
+									<listOptionValue builtIn="false" value="../app"/>
+									<listOptionValue builtIn="false" value="../../../Source/include"/>
+									<listOptionValue builtIn="false" value="../../../Source/portable/GCC/ARM_CM0"/>
+									<listOptionValue builtIn="false" value="../../../Demo/Common/include"/>
 									<listOptionValue builtIn="false" value="../board"/>
+									<listOptionValue builtIn="false" value="../board/boards"/>
+									<listOptionValue builtIn="false" value="../../../Source"/>
 									<listOptionValue builtIn="false" value="../source"/>
 									<listOptionValue builtIn="false" value="../"/>
-									<listOptionValue builtIn="false" value="../drivers"/>
-									<listOptionValue builtIn="false" value="../device"/>
-									<listOptionValue builtIn="false" value="../CMSIS"/>
-									<listOptionValue builtIn="false" value="../component/serial_manager"/>
-									<listOptionValue builtIn="false" value="../component/lists"/>
-									<listOptionValue builtIn="false" value="../component/uart"/>
-									<listOptionValue builtIn="false" value="../utilities"/>
-									<listOptionValue builtIn="false" value="../board/boards"/>
 									<listOptionValue builtIn="false" value="../../Source/include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CORTEX_M0+_LPC51U68_LPCXpresso/Source}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CORTEX_M0+_LPC51U68_LPCXpresso/Source/include}&quot;"/>
@@ -435,23 +443,27 @@
 								<option id="com.crt.advproject.gas.arch.795861739" name="Architecture" superClass="com.crt.advproject.gas.arch" value="com.crt.advproject.gas.target.cm0plus" valueType="enumerated"/>
 								<option id="gnu.both.asm.option.flags.crt.1941784517" name="Assembler flags" superClass="gnu.both.asm.option.flags.crt"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.1764862706" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="../drivers"/>
+									<listOptionValue builtIn="false" value="../utilities"/>
+									<listOptionValue builtIn="false" value="../component/serial_manager"/>
+									<listOptionValue builtIn="false" value="../CMSIS"/>
+									<listOptionValue builtIn="false" value="../component/uart"/>
+									<listOptionValue builtIn="false" value="../device"/>
+									<listOptionValue builtIn="false" value="../component/lists"/>
+									<listOptionValue builtIn="false" value="../app"/>
+									<listOptionValue builtIn="false" value="../../../Source/include"/>
+									<listOptionValue builtIn="false" value="../../../Source/portable/GCC/ARM_CM0"/>
+									<listOptionValue builtIn="false" value="../../../Demo/Common/include"/>
 									<listOptionValue builtIn="false" value="../board"/>
+									<listOptionValue builtIn="false" value="../board/boards"/>
+									<listOptionValue builtIn="false" value="../../../Source"/>
 									<listOptionValue builtIn="false" value="../source"/>
 									<listOptionValue builtIn="false" value="../"/>
-									<listOptionValue builtIn="false" value="../drivers"/>
-									<listOptionValue builtIn="false" value="../device"/>
-									<listOptionValue builtIn="false" value="../CMSIS"/>
-									<listOptionValue builtIn="false" value="../component/serial_manager"/>
-									<listOptionValue builtIn="false" value="../component/lists"/>
-									<listOptionValue builtIn="false" value="../component/uart"/>
-									<listOptionValue builtIn="false" value="../utilities"/>
-									<listOptionValue builtIn="false" value="../board/boards"/>
 									<listOptionValue builtIn="false" value="../../Source/include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CORTEX_M0+_LPC51U68_LPCXpresso/Source}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CORTEX_M0+_LPC51U68_LPCXpresso/Source/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CORTEX_M0+_LPC51U68_LPCXpresso/Source/portable/GCC/ARM_CM0}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CORTEX_M0+_LPC51U68_LPCXpresso/Source/portable/MemMang}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Demo/Common/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Demo/Common/include}&quot;"/>
 								</option>
 								<option id="gnu.both.asm.option.warnings.nowarn.2052214571" name="Suppress warnings (-W)" superClass="gnu.both.asm.option.warnings.nowarn"/>
@@ -595,11 +607,14 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="CMSIS"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Minimal"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Source"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="app"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="board"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="component"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="device"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="drivers"/>
+						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="startup"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH" kind="sourcePath" name="utilities"/>
 					</sourceEntries>
@@ -615,7 +630,7 @@
 	<storageModule moduleId="com.nxp.mcuxpresso.core.datamodels">
 		<sdkName>SDK_2.x_LPCXpresso51U68</sdkName>
 		<sdkVersion>2.6.0</sdkVersion>
-		<sdkComponents>middleware.baremetal.LPC51U68;platform.drivers.clock.LPC51U68;device.LPC51U68_CMSIS.LPC51U68;platform.Include_common.LPC51U68;platform.Include_core_cm0plus.LPC51U68;platform.drivers.common.LPC51U68;platform.drivers.power.LPC51U68;platform.drivers.reset.LPC51U68;platform.drivers.flexcomm.LPC51U68;platform.drivers.flexcomm_usart.LPC51U68;platform.drivers.lpc_gpio.LPC51U68;platform.drivers.lpc_iocon.LPC51U68;platform.drivers.pint.LPC51U68;component.serial_manager.LPC51U68;component.lists.LPC51U68;component.serial_manager_uart.LPC51U68;component.usart_adapter.LPC51U68;platform.utilities.assert.LPC51U68;utility.debug_console.LPC51U68;device.LPC51U68_startup.LPC51U68;project_template.lpcxpresso51u68.LPC51U68;</sdkComponents>
+		<sdkComponents>middleware.baremetal.LPC51U68;platform.drivers.clock.LPC51U68;device.LPC51U68_CMSIS.LPC51U68;platform.Include_common.LPC51U68;platform.Include_core_cm0plus.LPC51U68;platform.drivers.common.LPC51U68;platform.drivers.power.LPC51U68;platform.drivers.reset.LPC51U68;platform.drivers.flexcomm.LPC51U68;platform.drivers.flexcomm_usart.LPC51U68;platform.drivers.lpc_gpio.LPC51U68;platform.drivers.lpc_iocon.LPC51U68;platform.drivers.pint.LPC51U68;component.serial_manager.LPC51U68;component.lists.LPC51U68;component.serial_manager_uart.LPC51U68;component.usart_adapter.LPC51U68;platform.utilities.assert.LPC51U68;utility.debug_console.LPC51U68;device.LPC51U68_startup.LPC51U68;project_template.lpcxpresso51u68.LPC51U68;platform.drivers.ctimer.LPC51U68;</sdkComponents>
 		<boardId>lpcxpresso51u68</boardId>
 		<package>LPC51U68JBD64</package>
 		<core>cm0plus</core>
