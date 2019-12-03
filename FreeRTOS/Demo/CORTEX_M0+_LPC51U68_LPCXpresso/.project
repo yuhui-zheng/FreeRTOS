@@ -26,9 +26,34 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Minimal</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>Source</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>Minimal/IntQueue.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Common/Minimal/IntQueue.c</locationURI>
+		</link>
+		<link>
+			<name>Minimal/blocktim.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Common/Minimal/blocktim.c</locationURI>
+		</link>
+		<link>
+			<name>Minimal/countsem.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Common/Minimal/countsem.c</locationURI>
+		</link>
+		<link>
+			<name>Minimal/recmutex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Common/Minimal/recmutex.c</locationURI>
 		</link>
 		<link>
 			<name>Source/croutine.c</name>
@@ -198,12 +223,12 @@
 	</linkedResources>
 	<variableList>
 		<variable>
-			<name>FREERTOS_ROOT</name>
-			<value>$%7BPARENT-2-PROJECT_LOC%7D/Source</value>
+			<name>FREERTOS_DEMO_ROOT</name>
+			<value>$%7BPARENT-2-PROJECT_LOC%7D/Demo</value>
 		</variable>
 		<variable>
-			<name>FREERTOS_ROOT1</name>
-			<value>$%7BPARENT-2-FREERTOS_ROOT%7D/FreeRTOS/FreeRTOS/Source</value>
+			<name>FREERTOS_ROOT</name>
+			<value>$%7BPARENT-2-PROJECT_LOC%7D/Source</value>
 		</variable>
 	</variableList>
 </projectDescription>
