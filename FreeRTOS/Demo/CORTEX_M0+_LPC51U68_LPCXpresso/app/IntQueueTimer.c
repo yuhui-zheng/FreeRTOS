@@ -33,10 +33,8 @@
 #include "IntQueueTimer.h"
 #include "IntQueue.h"
 
-
-/* The two timer frequencies. */
-#define tmrTIMER_2_FREQUENCY	( 2000UL )
-#define tmrTIMER_3_FREQUENCY	( 2001UL )
+/* Driver APIs.*/
+#include "fsl_ctimer.h"
 
 /* The priorities for the two timers.  Note that a priority of 0 is the highest
 possible on Cortex-M devices. */
@@ -45,18 +43,83 @@ possible on Cortex-M devices. */
 
 void vInitialiseTimerForIntQueueTest( void )
 {
+	ctimer_config_t config_timer_0 = {0}, config_timer_1 = {0};
+	ctimer_match_config_t config_interrupt = {0};
 
+	/* Enable peripheral bus clock for CTIMER0 and CTIMER1. */
+	CLOCK_EnableClock(kCLOCK_Ctimer0);
+	CLOCK_EnableClock(kCLOCK_Ctimer1);
+
+	/* Interrupt settings for timers --
+	 A timer will generates an interrupt when the count matches the value specified.
+	 Timer will resets itself and restart the count. The interrupt frequency is fairly
+	 arbitrary, in a sense that all we need to make sure is IRQs are triggered so that
+	 queues have items for tasks to process. */
+	config_interrupt.enableCounterReset = true;
+	config_interrupt.enableCounterStop = false;
+	config_interrupt.enableInterrupt = true;
+	config_interrupt.matchValue = 0xFFFFF;
+	config_interrupt.outControl = kCTIMER_Output_NoAction;
+	config_interrupt.outPinInitState = true;
+
+	/* Configuration settings for timers. */
+	CTIMER_GetDefaultConfig(&config_timer_0);
+	config_timer_0.prescale = 1;
+
+	CTIMER_GetDefaultConfig(&config_timer_1);
+	config_timer_1.prescale = 2;
+
+	/* Initialize timers. */
+	CTIMER_Init(CTIMER0, &config_timer_0);
+	CTIMER_SetupMatch(CTIMER0, kCTIMER_Match_0, &config_interrupt);
+
+	CTIMER_Init(CTIMER1, &config_timer_1);
+	CTIMER_SetupMatch(CTIMER1, kCTIMER_Match_0, &config_interrupt);
+
+   	/* Don't generate interrupts until the scheduler has been started.
+   	Interrupts will be automatically enabled when the first task starts
+   	running. */
+   	taskDISABLE_INTERRUPTS();
+
+   	/* Set the timer interrupts to be above the kernel.  The interrupts are
+   	assigned different priorities so they nest with each other. */
+   	NVIC_SetPriority( CTIMER0_IRQn, trmSECOND_HIGHEST_PRIORITY );
+   	NVIC_SetPriority( CTIMER1_IRQn, tmrMAX_PRIORITY );
+
+   	/* Enable the timer interrupts. */
+   	NVIC_EnableIRQ( CTIMER0_IRQn );
+   	NVIC_EnableIRQ( CTIMER1_IRQn );
+
+   	/* Start timers. */
+   	CTIMER_StartTimer(CTIMER0);
+   	CTIMER_StartTimer(CTIMER1);
 }
 /*-----------------------------------------------------------*/
 
-void TIMER16_0_IRQHandler(void)
+void CTIMER0_IRQHandler(void)
 {
+    uint32_t int_stat;
 
+    /* Get Interrupt status flags */
+    int_stat = CTIMER_GetStatusFlags(CTIMER0);
+
+    /* Clear the status flags that were set */
+    CTIMER_ClearStatusFlags(CTIMER0, int_stat);
+
+	portEND_SWITCHING_ISR( xFirstTimerHandler() );
 }
 /*-----------------------------------------------------------*/
 
-void TIMER16_1_IRQHandler(void)
+void CTIMER1_IRQHandler(void)
 {
+	uint32_t int_stat;
 
+	/* Get Interrupt status flags */
+    int_stat = CTIMER_GetStatusFlags(CTIMER1);
+
+	/* Clear the status flags that were set */
+    CTIMER_ClearStatusFlags(CTIMER1, int_stat);
+
+	portEND_SWITCHING_ISR( xSecondTimerHandler() );
 }
 /*-----------------------------------------------------------*/

@@ -49,7 +49,7 @@
 
 /* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to one to run the simple blinky demo,
 or 0 to run the more comprehensive test and demo application. */
-#define mainCREATE_SIMPLE_BLINKY_DEMO_ONLY	1
+#define mainCREATE_SIMPLE_BLINKY_DEMO_ONLY	0
 
 /*-----------------------------------------------------------*/
 typedef enum LED_STATE {
@@ -63,8 +63,12 @@ typedef enum LED_STATE {
 
 /* Static variable to keep track of LED color.
  red -> green -> blue -> red -> ...
- This variable is not intended for multi threaded application. */
+ This variable is not intended for multi-threaded application. */
 static E_LED_STATE eLedState = LED_RED_BLINK_ON;
+
+/* Show iteration number in UART.
+ This variable is not intended for multi-threaded application.*/
+static int i = 0;
 
 /*
  * Perform any application specific hardware configuration.  The clocks,
@@ -103,7 +107,7 @@ int main(void)
 	/* Show something on UART.
     Serial port setup as baudrate: 115200, data: 8-bit, parity: none, stop bits: 1, flow control: none.
     Terminal setup as receive: auto, transmit: CR+LF.*/
-	PRINTF("FreeRTOS demo.\n");
+	PRINTF("FreeRTOS demo.\r\n");
 
 	/* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
 	of this file. */
@@ -126,6 +130,9 @@ void vMainToggleLED( void )
 	switch (eLedState)
 	{
 		case LED_RED_BLINK_ON:
+			PRINTF("Iteration %d.\r\n", i);
+			i++;
+
 			LED_RED_ON();
 			eLedState = LED_RED_BLINK_OFF;
 			break;
@@ -161,14 +168,14 @@ void vMainToggleLED( void )
 
 static void prvSetupHardware( void )
 {
-	/* Enable clock for GPIO. */
-	CLOCK_EnableClock(kCLOCK_Gpio0);
-	CLOCK_EnableClock(kCLOCK_Gpio1);
-
   	/* Initialize board hardware. */
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
+
+    /* Enable clock for GPIO. */
+    CLOCK_EnableClock(kCLOCK_Gpio0);
+   	CLOCK_EnableClock(kCLOCK_Gpio1);
 
   	/* Initialize FSL debug console. */
     BOARD_InitDebugConsole();
