@@ -99,6 +99,12 @@ in ticks using the portTICK_PERIOD_MS constant. */
 /* A block time of zero simply means "don't block". */
 #define mainDONT_BLOCK						( 0UL )
 
+/* Set mainNO_TASK_NO_CHECK to
+ * 0 -- to include all predefined test tasks and checks,
+ * 1 -- to exclude all predefined test tasks and checks.
+ * When set to 1 (with few tasks in system), user could observe how tickless
+ * idle could minimize tick interrupt. */
+#define mainNO_TASK_NO_CHECK				( 1 )
 /*-----------------------------------------------------------*/
 
 /*
@@ -143,6 +149,7 @@ for the additional required for the stack overflow checking to work (if
 configured). */
 const size_t xRegTestStackSize = 25U;
 
+#if ( mainNO_TASK_NO_CHECK == 0 )
 	/* Create the standard demo tasks, including the interrupt nesting test
 	tasks. */
 	vStartInterruptQueueTasks();
@@ -166,6 +173,7 @@ const size_t xRegTestStackSize = 25U;
 					NULL, 					/* The task parameter is not used. */
 					tskIDLE_PRIORITY, 		/* The priority to assign to the task. */
 					NULL );					/* Don't receive a handle back, it is not needed. */
+#endif /* mainNO_TASK_NO_CHECK */
 
 	/* Create the software timer that performs the 'check' functionality,
 	as described at the top of this file. */
@@ -204,6 +212,7 @@ static long lChangedTimerPeriodAlready = pdFALSE;
 static unsigned long ulLastRegTest1Value = 0, ulLastRegTest2Value = 0;
 unsigned long ulErrorFound = pdFALSE;
 
+#if ( mainNO_TASK_NO_CHECK == 0 )
 	/* Check all the demo and test tasks to ensure that they are all still
 	running, and that none have detected an error. */
 	if( xAreIntQueueTasksStillRunning() != pdPASS )
@@ -239,6 +248,7 @@ unsigned long ulErrorFound = pdFALSE;
 		ulErrorFound |= ( 0x01UL << 5UL );
 	}
 	ulLastRegTest2Value = ulRegTest2LoopCounter;
+#endif /* mainNO_TASK_NO_CHECK */
 
 	/* Toggle the check LED to give an indication of the system status.  If
 	the LED toggles every mainCHECK_TIMER_PERIOD_MS milliseconds then

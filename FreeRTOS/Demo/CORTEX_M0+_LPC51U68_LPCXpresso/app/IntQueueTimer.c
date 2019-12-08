@@ -43,8 +43,8 @@ possible on Cortex-M devices. */
 
 void vInitialiseTimerForIntQueueTest( void )
 {
-	ctimer_config_t config_timer_0 = {0}, config_timer_1 = {0};
-	ctimer_match_config_t config_interrupt = {0};
+	ctimer_config_t config_timer_0 = { 0 }, config_timer_1 = { 0 };
+	ctimer_match_config_t config_interrupt = { 0 };
 
 	/* Enable peripheral bus clock for CTIMER0 and CTIMER1. */
 	CLOCK_EnableClock(kCLOCK_Ctimer0);

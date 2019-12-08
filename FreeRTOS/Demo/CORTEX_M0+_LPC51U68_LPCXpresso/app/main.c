@@ -47,8 +47,10 @@
 #include "task.h"
 
 
-/* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to one to run the simple blinky demo,
-or 0 to run the more comprehensive test and demo application. */
+/* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to
+ * 0 -- to run the more comprehensive test and demo application,
+ * 1 -- to run the simple blinky demo.
+ */
 #define mainCREATE_SIMPLE_BLINKY_DEMO_ONLY	0
 
 /*-----------------------------------------------------------*/
@@ -62,13 +64,18 @@ typedef enum LED_STATE {
 } E_LED_STATE;
 
 /* Static variable to keep track of LED color.
- red -> green -> blue -> red -> ...
- This variable is not intended for multi-threaded application. */
+ * red -> green -> blue -> red -> ...
+ * This variable is not intended for multi-threaded application.
+ */
 static E_LED_STATE eLedState = LED_RED_BLINK_ON;
 
 /* Show iteration number in UART.
- This variable is not intended for multi-threaded application.*/
+ * This variable is not intended for multi-threaded application.
+ */
 static int i = 0;
+
+/* Track how many times tick interrupt has occurred. */
+static unsigned int uTickInterruptCounter = 0;
 
 /*
  * Perform any application specific hardware configuration.  The clocks,
@@ -130,7 +137,7 @@ void vMainToggleLED( void )
 	switch (eLedState)
 	{
 		case LED_RED_BLINK_ON:
-			PRINTF("Iteration %d.\r\n", i);
+			PRINTF("Iteration %d -- tick interrupt count %d.\r\n", i, uTickInterruptCounter);
 			i++;
 
 			LED_RED_ON();
@@ -275,6 +282,8 @@ extern unsigned long _pvHeapStart[];
 	in FreeRTOSConifg.h, but the interrupt stack is not. */
 	configASSERT( memcmp( ( void * ) _pvHeapStart, ucExpectedInterruptStackValues, sizeof( ucExpectedInterruptStackValues ) ) == 0U );
 #endif /* mainCHECK_INTERRUPT_STACK */
+
+	uTickInterruptCounter++;
 }
 
 
