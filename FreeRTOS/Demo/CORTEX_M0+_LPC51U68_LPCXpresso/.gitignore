@@ -1,0 +1,9 @@
+# Ignore Xpresso generated files.
+/.settings/
+/Debug/
+
+# Ignore Keil generated files.
+/Listings/
+/Objects/
+
+# Ignore IAR generated files.
