@@ -29,7 +29,7 @@
  */
  
 /**
- * @file    COREX_M0+_LPC51U68_LPCXpresso.c
+ * @file    main.c
  * @brief   Application entry point.
  */
 #include <stdio.h>
@@ -46,6 +46,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "compiler_attributes.h"
 
 /* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to
  * 0 -- to run the more comprehensive test and demo application,
@@ -112,9 +113,9 @@ int main(void)
 	prvInitializeHeap();
 
 	/* Show something on UART.
-    Serial port setup as baudrate: 115200, data: 8-bit, parity: none, stop bits: 1, flow control: none.
-    Terminal setup as receive: auto, transmit: CR+LF.*/
-	PRINTF("FreeRTOS demo.\r\n");
+	Serial port setup as baudrate: 115200, data: 8-bit, parity: none, stop bits: 1, flow control: none.
+	sTerminal setup as receive: auto, transmit: CR+LF.*/
+	PRINTF("FreeRTOS demo. sizeof size_t: %d\r\n", sizeof(size_t));
 
 	/* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
 	of this file. */
@@ -175,45 +176,48 @@ void vMainToggleLED( void )
 
 static void prvSetupHardware( void )
 {
-  	/* Initialize board hardware. */
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
+	/* Initialize board hardware. */
+	BOARD_InitBootPins();
+	BOARD_InitBootClocks();
+	BOARD_InitBootPeripherals();
 
-    /* Enable clock for GPIO. */
-    CLOCK_EnableClock(kCLOCK_Gpio0);
-   	CLOCK_EnableClock(kCLOCK_Gpio1);
+	/* Enable clock for GPIO. */
+	CLOCK_EnableClock(kCLOCK_Gpio0);
+	CLOCK_EnableClock(kCLOCK_Gpio1);
 
-  	/* Initialize FSL debug console. */
-    BOARD_InitDebugConsole();
+	/* Initialize FSL debug console. */
+	BOARD_InitDebugConsole();
 
-    /* Initialize tri-color LED. */
-    LED_RED_INIT(LOGIC_LED_OFF);
-    LED_GREEN_INIT(LOGIC_LED_OFF);
-    LED_BLUE_INIT(LOGIC_LED_OFF);
+	/* Initialize tri-color LED. */
+	LED_RED_INIT(LOGIC_LED_OFF);
+	LED_GREEN_INIT(LOGIC_LED_OFF);
+	LED_BLUE_INIT(LOGIC_LED_OFF);
 
-    return;
+	return;
 }
 
 /*-----------------------------------------------------------*/
 
 static void prvInitializeHeap( void )
 {
-    static uint8_t ucHeap1[ configTOTAL_HEAP_SIZE ];
+	/* Place the first block of the heap memory in the first bank of RAM. */
+	static uint8_t ucHeap1[ configTOTAL_HEAP_SIZE ];
 
-    /* The second bank of SRAM is of 32kB in total. Let's assign half to FreeRTOS heap. */
-    static uint8_t ucHeap2[ 16 * 1024 ] __attribute__( ( section( ".freertos_heap2" ) ) );
+	/* Place the second block of the heap memory in the second bank of RAM. */
+	//static uint8_t ucHeap2[ 16 * 1024 ] __attribute__( ( section( ".freertos_heap2" ) ) );
+	static uint8_t ucHeap2[ 16 * 1024 ] COMPILER_ATTRIBUTE_START_ADDRESS( 0x20000000 );
+	
+	/* Memory regions in address order, and terminate with NULL. */
+	static HeapRegion_t xHeapRegions[] =
+	{
+		{ ( unsigned char * ) ucHeap1, sizeof( ucHeap1 ) },
+		{ ( unsigned char * ) ucHeap2, sizeof( ucHeap2 ) },
+		{ NULL,                        0                 }
+	};
 
-    HeapRegion_t xHeapRegions[] =
-    {
-        { ( unsigned char * ) ucHeap2, sizeof( ucHeap2 ) },
-        { ( unsigned char * ) ucHeap1, sizeof( ucHeap1 ) },
-        { NULL,                        0                 }
-    };
+	vPortDefineHeapRegions( xHeapRegions );
 
-    vPortDefineHeapRegions( xHeapRegions );
-
-    return;
+	return;
 }
 
 /*-----------------------------------------------------------*/
