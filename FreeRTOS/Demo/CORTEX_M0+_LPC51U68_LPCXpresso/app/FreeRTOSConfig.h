@@ -41,8 +41,11 @@
  * See http://www.freertos.org/a00110.html
  *----------------------------------------------------------*/
 
-#include <stdint.h>
-extern uint32_t SystemCoreClock;
+/* Prevent C code being included by the IAR assembler. */
+#ifndef __IASMARM__
+  #include <stdint.h>
+  extern uint32_t SystemCoreClock;
+#endif
 
 #define configUSE_PREEMPTION			1
 #define configUSE_IDLE_HOOK				0
