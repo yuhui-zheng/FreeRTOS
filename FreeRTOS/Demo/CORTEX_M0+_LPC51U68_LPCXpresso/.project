@@ -223,12 +223,30 @@
 	</linkedResources>
 	<filteredResources>
 		<filter>
-			<id>1575784592715</id>
+			<id>1575965201653</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-true-false-Keil_specific</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1575965201690</id>
+			<name></name>
+			<type>30</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-true-false-IAR_specific</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1575965201715</id>
+			<name></name>
+			<type>6</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-true-true-CORTEX__M0+_LPC51U68_Keil*?</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>
