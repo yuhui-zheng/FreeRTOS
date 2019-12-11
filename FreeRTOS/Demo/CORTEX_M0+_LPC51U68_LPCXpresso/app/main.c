@@ -115,7 +115,7 @@ int main(void)
 	/* Show something on UART.
 	Serial port setup as baudrate: 115200, data: 8-bit, parity: none, stop bits: 1, flow control: none.
 	sTerminal setup as receive: auto, transmit: CR+LF.*/
-	PRINTF("FreeRTOS demo. sizeof size_t: %d\r\n", sizeof(size_t));
+	PRINTF("FreeRTOS demo.\r\n");
 
 	/* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
 	of this file. */
@@ -204,10 +204,9 @@ static void prvInitializeHeap( void )
 	static uint8_t ucHeap1[ configTOTAL_HEAP_SIZE ];
 
 	/* Place the second block of the heap memory in the second bank of RAM. */
-	//static uint8_t ucHeap2[ 16 * 1024 ] __attribute__( ( section( ".freertos_heap2" ) ) );
-	static uint8_t ucHeap2[ 16 * 1024 ] COMPILER_ATTRIBUTE_START_ADDRESS( 0x20000000 );
+	static uint8_t ucHeap2[ 16 * 1024 ] COMPILER_ATTRIBUTE_PLACE_IN_2ND_MEMORY_BANK;
 	
-	/* Memory regions in address order, and terminate with NULL. */
+	/* Memory regions are defined in address order, and terminate with NULL. */
 	static HeapRegion_t xHeapRegions[] =
 	{
 		{ ( unsigned char * ) ucHeap1, sizeof( ucHeap1 ) },
