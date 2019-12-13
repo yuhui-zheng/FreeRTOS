@@ -367,9 +367,9 @@
             <RepFail>1</RepFail>
             <useFile>0</useFile>
             <TextAddressRange>0x00000000</TextAddressRange>
-            <DataAddressRange>0x20000000</DataAddressRange>
+            <DataAddressRange>0x04000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile>.\Keil_specific\LPC51U68_ram.scf</ScatterFile>
+            <ScatterFile>.\Keil_specific\LPC51U68_flash.scf</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>

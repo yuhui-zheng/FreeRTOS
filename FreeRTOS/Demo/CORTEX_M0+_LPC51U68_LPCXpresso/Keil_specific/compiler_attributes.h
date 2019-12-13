@@ -26,4 +26,4 @@
  */
 
 /* Placing variable at specified address. */
-#define COMPILER_ATTRIBUTE_PLACE_IN_2ND_MEMORY_BANK			__attribute__((section("m_data_start")))
+#define COMPILER_ATTRIBUTE_PLACE_IN_2ND_MEMORY_BANK			//__attribute__((section("m_data_start")))
