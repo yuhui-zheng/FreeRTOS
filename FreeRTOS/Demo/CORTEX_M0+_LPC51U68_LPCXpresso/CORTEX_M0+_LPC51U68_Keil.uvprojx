@@ -193,7 +193,7 @@
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
             <RoSelD>3</RoSelD>
-            <RwSelD>4</RwSelD>
+            <RwSelD>3</RwSelD>
             <CodeSel>0</CodeSel>
             <OptFeed>0</OptFeed>
             <NoZi1>0</NoZi1>
@@ -210,7 +210,7 @@
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
             <Im1Chk>1</Im1Chk>
-            <Im2Chk>0</Im2Chk>
+            <Im2Chk>1</Im2Chk>
             <OnChipMemories>
               <Ocm1>
                 <Type>0</Type>
@@ -299,13 +299,13 @@
               </OCR_RVCT8>
               <OCR_RVCT9>
                 <Type>0</Type>
-                <StartAddress>0x20000000</StartAddress>
-                <Size>0x10000</Size>
+                <StartAddress>0x4000000</StartAddress>
+                <Size>0x8000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
-                <StartAddress>0x4000000</StartAddress>
-                <Size>0x8000</Size>
+                <StartAddress>0x20000000</StartAddress>
+                <Size>0x10000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
             <RvctStartVector></RvctStartVector>
@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Source\include;..\CORTEX_M0+_LPC51U68_LPCXpresso\CMSIS;..\CORTEX_M0+_LPC51U68_LPCXpresso\app;..\CORTEX_M0+_LPC51U68_LPCXpresso\board\boards;..\CORTEX_M0+_LPC51U68_LPCXpresso\component\lists;..\CORTEX_M0+_LPC51U68_LPCXpresso\component\serial_manager;..\CORTEX_M0+_LPC51U68_LPCXpresso\component\uart;..\CORTEX_M0+_LPC51U68_LPCXpresso\device;..\CORTEX_M0+_LPC51U68_LPCXpresso\drivers;..\CORTEX_M0+_LPC51U68_LPCXpresso\utilities;..\..\Source\portable\RVDS\ARM_CM0;..\Common\include</IncludePath>
+              <IncludePath>..\..\Source\include;..\..\Source\portable\RVDS\ARM_CM0;..\Common\include;.\CMSIS;.\app;.\board\boards;.\component\lists;.\component\serial_manager;.\component\uart;.\device;.\drivers;.\utilities;.\Keil_specific</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -369,7 +369,7 @@
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile>.\Keil_specific\LPC51U68_flash.scf</ScatterFile>
+            <ScatterFile>.\Keil_specific\LPC51U68_ram.scf</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
@@ -416,6 +416,11 @@
               <FileName>RegTest_Keil.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\Keil_specific\RegTest_Keil.s</FilePath>
+            </File>
+            <File>
+              <FileName>compiler_attributes.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Keil_specific\compiler_attributes.h</FilePath>
             </File>
           </Files>
         </Group>

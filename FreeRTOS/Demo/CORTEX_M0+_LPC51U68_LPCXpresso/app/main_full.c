@@ -104,7 +104,7 @@ in ticks using the portTICK_PERIOD_MS constant. */
  * 1 -- to exclude all predefined test tasks and checks.
  * When set to 1 (with few tasks in system), user could observe how tickless
  * idle could minimize tick interrupt. */
-#define mainNO_TASK_NO_CHECK				( 1 )
+#define mainNO_TASK_NO_CHECK				( 0 )
 /*-----------------------------------------------------------*/
 
 /*

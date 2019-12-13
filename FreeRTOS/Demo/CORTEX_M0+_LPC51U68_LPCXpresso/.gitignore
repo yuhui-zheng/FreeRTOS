@@ -3,7 +3,11 @@
 /Debug/
 
 # Ignore Keil generated files.
+*.uvguix.*
+EventRecorderStub.scvd
 /Listings/
 /Objects/
 
 # Ignore IAR generated files.
+/settings/
+/Debug_IAR/
