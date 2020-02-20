@@ -533,61 +533,6 @@
             </File>
           </Files>
         </Group>
-        <Group>
-          <GroupName>uIP_Source</GroupName>
-          <Files>
-            <File>
-              <FileName>uIP_Task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\webserver\uIP_Task.c</FilePath>
-            </File>
-            <File>
-              <FileName>emac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\webserver\emac.c</FilePath>
-            </File>
-            <File>
-              <FileName>httpd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\webserver\httpd.c</FilePath>
-            </File>
-            <File>
-              <FileName>httpd-cgi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\webserver\httpd-cgi.c</FilePath>
-            </File>
-            <File>
-              <FileName>httpd-fs.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\webserver\httpd-fs.c</FilePath>
-            </File>
-            <File>
-              <FileName>http-strings.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\webserver\http-strings.c</FilePath>
-            </File>
-            <File>
-              <FileName>uip_arp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Common\ethernet\uIP\uip-1.0\uip\uip_arp.c</FilePath>
-            </File>
-            <File>
-              <FileName>psock.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Common\ethernet\uIP\uip-1.0\uip\psock.c</FilePath>
-            </File>
-            <File>
-              <FileName>timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Common\ethernet\uIP\uip-1.0\uip\timer.c</FilePath>
-            </File>
-            <File>
-              <FileName>uip.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Common\ethernet\uIP\uip-1.0\uip\uip.c</FilePath>
-            </File>
-          </Files>
-        </Group>
       </Groups>
     </Target>
   </Targets>
