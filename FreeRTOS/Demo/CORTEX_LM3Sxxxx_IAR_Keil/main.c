@@ -104,6 +104,7 @@ and the TCP/IP stack together cannot be accommodated with the 32K size limit. */
 #include "partest.h"
 #include "lcd_message.h"
 #include "bitmap.h"
+#include "posix_demo.h"
 
 /*-----------------------------------------------------------*/
 
@@ -220,6 +221,8 @@ int main( void )
 
 	/* Start the tasks defined within this file/specific to this demo. */
 	xTaskCreate( vOLEDTask, "OLED", mainOLED_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+	
+	vStartPOSIXDemo(NULL);
 
 	/* Uncomment the following line to configure the high frequency interrupt
 	used to measure the interrupt jitter time.
