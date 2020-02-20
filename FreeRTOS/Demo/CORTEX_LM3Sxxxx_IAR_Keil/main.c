@@ -100,22 +100,10 @@ and the TCP/IP stack together cannot be accommodated with the 32K size limit. */
 #include "uart.h"
 
 /* Demo app includes. */
-#include "death.h"
-#include "blocktim.h"
 #include "flash.h"
 #include "partest.h"
-#include "semtest.h"
-#include "PollQ.h"
 #include "lcd_message.h"
 #include "bitmap.h"
-#include "GenQTest.h"
-#include "QPeek.h"
-#include "recmutex.h"
-#include "IntQueue.h"
-#include "QueueSet.h"
-#include "EventGroupsDemo.h"
-#include "MessageBufferDemo.h"
-#include "StreamBufferDemo.h"
 
 /*-----------------------------------------------------------*/
 
@@ -154,6 +142,9 @@ the jitter time in nano seconds. */
 #define mainMAX_ROWS_64						( mainCHARACTER_HEIGHT * 7 )
 #define mainFULL_SCALE						( 15 )
 #define ulSSI_FREQUENCY						( 3500000UL )
+
+/* Control how often to print user readable message. */
+#define mainPrintAtNthIteration 	( 1000 )
 
 /*-----------------------------------------------------------*/
 
@@ -214,19 +205,6 @@ int main( void )
 	are received via this queue. */
 	xOLEDQueue = xQueueCreate( mainOLED_QUEUE_SIZE, sizeof( xOLEDMessage ) );
 
-	/* Start the standard demo tasks. */
-	vStartGenericQueueTasks( mainGEN_QUEUE_TASK_PRIORITY );
-	vStartInterruptQueueTasks();
-	vStartRecursiveMutexTasks();
-	vCreateBlockTimeTasks();
-	vStartSemaphoreTasks( mainSEM_TEST_PRIORITY );
-	vStartPolledQueueTasks( mainQUEUE_POLL_PRIORITY );
-	vStartQueuePeekTasks();
-	vStartQueueSetTasks();
-	vStartEventGroupTasks();
-	vStartMessageBufferTasks( configMINIMAL_STACK_SIZE );
-	vStartStreamBufferTasks();
-
 	/* Exclude some tasks if using the kickstart version to ensure we stay within
 	the 32K code size limit. */
 	#if mainINCLUDE_WEB_SERVER != 0
@@ -242,11 +220,6 @@ int main( void )
 
 	/* Start the tasks defined within this file/specific to this demo. */
 	xTaskCreate( vOLEDTask, "OLED", mainOLED_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
-
-	/* The suicide tasks must be created last as they need to know how many
-	tasks were running prior to their creation in order to ascertain whether
-	or not the correct/expected number of tasks are running at any given time. */
-	vCreateSuicidalTasks( mainCREATOR_TASK_PRIORITY );
 
 	/* Uncomment the following line to configure the high frequency interrupt
 	used to measure the interrupt jitter time.
@@ -291,78 +264,20 @@ void prvSetupHardware( void )
 
 void vApplicationTickHook( void )
 {
-static xOLEDMessage xMessage = { "PASS" };
-static unsigned long ulTicksSinceLastDisplay = 0;
+static xOLEDMessage xMessage = { "PASS\r\n" };
 portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
-	/* Called from every tick interrupt.  Have enough ticks passed to make it
-	time to perform our health status check again? */
-	ulTicksSinceLastDisplay++;
-	if( ulTicksSinceLastDisplay >= mainCHECK_DELAY )
+static int iteration = 0;
+
+	if ( iteration % mainPrintAtNthIteration == 0 )
 	{
-		ulTicksSinceLastDisplay = 0;
-
-		/* Has an error been found in any task? */
-		if( xAreStreamBufferTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN STRM";
-		}
-		else if( xAreMessageBufferTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN MSG";
-		}
-		if( xAreGenericQueueTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN GEN Q";
-		}
-	    else if( xIsCreateTaskStillRunning() != pdTRUE )
-	    {
-	        xMessage.pcMessage = "ERROR IN CREATE";
-	    }
-		else if( xAreIntQueueTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN INT QUEUE";
-		}
-		else if( xAreBlockTimeTestTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN BLOCK TIME";
-		}
-		else if( xAreSemaphoreTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN SEMAPHORE";
-		}
-		else if( xArePollingQueuesStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN POLL Q";
-		}
-		else if( xAreQueuePeekTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN PEEK Q";
-		}
-		else if( xAreRecursiveMutexTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN REC MUTEX";
-		}
-		else if( xAreQueueSetTasksStillRunning() != pdPASS )
-		{
-			xMessage.pcMessage = "ERROR IN Q SET";
-		}
-		else if( xAreEventGroupTasksStillRunning() != pdTRUE )
-		{
-			xMessage.pcMessage = "ERROR IN EVNT GRP";
-		}
-
 		/* Send the message to the OLED gatekeeper for display. */
-		xHigherPriorityTaskWoken = pdFALSE;
 		xQueueSendFromISR( xOLEDQueue, &xMessage, &xHigherPriorityTaskWoken );
 	}
-
-	/* Write to a queue that is in use as part of the queue set demo to
-	demonstrate using queue sets from an ISR. */
-	vQueueSetAccessQueueSetFromISR();
-
-	/* Call the event group ISR tests. */
-	vPeriodicEventGroupsProcessing();
+	
+	iteration++;
+	
+	return;
 }
 /*-----------------------------------------------------------*/
 
