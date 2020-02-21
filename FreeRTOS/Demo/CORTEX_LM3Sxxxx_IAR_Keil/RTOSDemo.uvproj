@@ -461,6 +461,11 @@
               <FileType>1</FileType>
               <FilePath>.\POSIX-demo\posix_demo.c</FilePath>
             </File>
+            <File>
+              <FileName>posix_demo.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\POSIX-demo\posix_demo.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

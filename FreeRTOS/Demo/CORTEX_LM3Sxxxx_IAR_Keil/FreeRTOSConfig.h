@@ -112,6 +112,9 @@ allowable margin of error on slower processors (slower than the Win32
 machine on which the test is developed). */
 #define configSTREAM_BUFFER_TRIGGER_LEVEL_TEST_MARGIN   4
 
+/* The logger is configured to log to UART in this demo. And here we bound the maximum message size. */
+#define configMAXIMUM_LOG_MESSAGE_SIZE						128
+
 #ifdef __ICCARM__
 	void vAssertCalled( const char *pcFile, unsigned long ulLine );
 	#define configASSERT( x ) if( ( x ) == 0 ) vAssertCalled( __FILE__, __LINE__ );

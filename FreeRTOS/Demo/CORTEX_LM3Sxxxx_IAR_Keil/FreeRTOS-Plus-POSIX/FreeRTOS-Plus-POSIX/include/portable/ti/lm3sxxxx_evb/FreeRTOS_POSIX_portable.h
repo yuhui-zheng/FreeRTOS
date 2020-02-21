@@ -31,6 +31,6 @@
 #ifndef _FREERTOS_POSIX_PORTABLE_H_
 #define _FREERTOS_POSIX_PORTABLE_H_
 
-#define PTHREAD_STACK_MIN    configMINIMAL_STACK_SIZE * sizeof( StackType_t ) * 4
+#define PTHREAD_STACK_MIN    configMINIMAL_STACK_SIZE * sizeof( StackType_t ) * 6
 
 #endif /* _FREERTOS_POSIX_PORTABLE_H_ */

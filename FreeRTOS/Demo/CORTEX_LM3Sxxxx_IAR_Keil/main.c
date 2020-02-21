@@ -129,6 +129,9 @@ tick hook. */
 time. */
 #define mainOLED_QUEUE_SIZE					( 3 )
 
+/* The maximum number of messages that can be waiting for logging at any time. */
+#define mainUART_QUEUE_SIZE					( 10 )
+
 /* Dimensions the buffer into which the jitter time is written. */
 #define mainMAX_MSG_LEN						25
 
@@ -164,6 +167,11 @@ extern void vuIP_Task( void *pvParameters );
 static void vOLEDTask( void *pvParameters );
 
 /*
+ * This task provides thread safe logging mechanism to UART. 
+ */
+static void vUARTTask( void *pvParameters );
+
+/*
  * Configure the hardware for the demo.
  */
 static void prvSetupHardware( void );
@@ -187,6 +195,9 @@ static void prvPrintString( const char * pcString );
 /* The queue used to send messages to the OLED task. */
 QueueHandle_t xOLEDQueue;
 
+/* The queue used to send messages to the UART logging task. */
+QueueHandle_t xUARTQueue;
+
 /* The welcome text. */
 const char * const pcWelcomeMessage = "   www.FreeRTOS.org";
 
@@ -205,29 +216,16 @@ int main( void )
 	/* Create the queue used by the OLED task.  Messages for display on the OLED
 	are received via this queue. */
 	xOLEDQueue = xQueueCreate( mainOLED_QUEUE_SIZE, sizeof( xOLEDMessage ) );
-
-	/* Exclude some tasks if using the kickstart version to ensure we stay within
-	the 32K code size limit. */
-	#if mainINCLUDE_WEB_SERVER != 0
-	{
-		/* Create the uIP task if running on a processor that includes a MAC and
-		PHY. */
-		if( SysCtlPeripheralPresent( SYSCTL_PERIPH_ETH ) )
-		{
-			xTaskCreate( vuIP_Task, "uIP", mainBASIC_WEB_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY - 1, NULL );
-		}
-	}
-	#endif
+	
+	/* Create the queue used by UART logging task. */
+	xUARTQueue = xQueueCreate( mainUART_QUEUE_SIZE, configMAXIMUM_LOG_MESSAGE_SIZE );
 
 	/* Start the tasks defined within this file/specific to this demo. */
 	xTaskCreate( vOLEDTask, "OLED", mainOLED_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+	xTaskCreate( vUARTTask, "Logger", configMINIMAL_STACK_SIZE * sizeof( StackType_t ) * 10, NULL, tskIDLE_PRIORITY, NULL );
 	
 	/* Start the task to run POSIX demo */
-	xTaskCreate( vStartPOSIXDemo, "posix", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
-
-	/* Uncomment the following line to configure the high frequency interrupt
-	used to measure the interrupt jitter time.
-	vSetupHighFrequencyTimer(); */
+  xTaskCreate( vStartPOSIXDemo, "posix", configMINIMAL_STACK_SIZE * sizeof( StackType_t ), NULL, tskIDLE_PRIORITY, NULL );
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -268,7 +266,7 @@ void prvSetupHardware( void )
 
 void vApplicationTickHook( void )
 {
-static xOLEDMessage xMessage = { "PASS\r\n" };
+static xOLEDMessage xMessage = { "PASS" };
 portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
 static int iteration = 0;
@@ -367,9 +365,28 @@ void ( *vOLEDClear )( void ) = NULL;
 		high priority time test. */
 		sprintf( cMessage, "%s [%uns]", xMessage.pcMessage, ulMaxJitter * mainNS_PER_CLOCK );
 		vOLEDStringDraw( cMessage, 0, ulY, mainFULL_SCALE );
+		
+	}
+}
+/*-----------------------------------------------------------*/
+
+static void vUARTTask( void *pvParameters )
+{
+	/* Have a local buffer to hold message from queue. 
+	   For simplicity, we are not going to do any formatting here.
+	   Caller needs to put proper line ending, if readability is preferred. 
+	*/ 
+	char cMessage[ configMAXIMUM_LOG_MESSAGE_SIZE ];
+	prvPrintString("POWERED BY FreeRTOS\r\n");
+	
+	for( ;; )
+	{
+		/* Wait for a message to arrive that requires displaying. */
+		xQueueReceive( xUARTQueue, &cMessage, portMAX_DELAY );
 		prvPrintString( cMessage );
 	}
 }
+
 /*-----------------------------------------------------------*/
 
 volatile signed char *pcOverflowedTask = NULL;
