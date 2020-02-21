@@ -111,7 +111,7 @@ typedef enum ControlMessage
  * @defgroup Configuration constants for the dispatcher-worker demo.
  */
 /**@{ */
-#define MQUEUE_NUMBER_OF_WORKERS    ( 4 )                        /**< The number of worker threads, each thread has one queue which is used as income box. */
+#define MQUEUE_NUMBER_OF_WORKERS    ( 1 )                        /**< The number of worker threads, each thread has one queue which is used as income box. */
 
 #if ( MQUEUE_NUMBER_OF_WORKERS > 10 )
     #error "Please keep MQUEUE_NUMBER_OF_WORKERS < 10."
@@ -160,7 +160,7 @@ static void * prvWorkerThread( void * pvArgs )
     ssize_t xMessageSize = 0;
     char pcReceiveBuffer[ MQUEUE_MSG_WORKER_CTRL_MSG_SIZE ] = { 0 };
 		
-		printf( "Worker thread #[%d] - start %s", ( int ) pArgList.pxID, LINE_BREAK );
+		//printf( "Worker thread #[%d] - start %s", ( int ) pArgList.pxID, LINE_BREAK );
 
     /* This is a worker thread that reacts based on what is sent to its inbox (mqueue). */
     while( true )
@@ -181,11 +181,11 @@ static void * prvWorkerThread( void * pvArgs )
                 case eWORKER_CTRL_MSG_CONTINUE:
                     /* Task branch, currently only prints message to screen. */
                     /* Could perform tasks here. Could also notify dispatcher upon completion, if desired. */
-                    printf( "Worker thread #[%d] -- Received eWORKER_CTRL_MSG_CONTINUE %s", ( int ) pArgList.pxID, LINE_BREAK );
+                    //printf( "Worker thread #[%d] -- Received eWORKER_CTRL_MSG_CONTINUE %s", ( int ) pArgList.pxID, LINE_BREAK );
                     break;
 
                 case eWORKER_CTRL_MSG_EXIT:
-                    printf( "Worker thread #[%d] -- Finished. Exit now. %s", ( int ) pArgList.pxID, LINE_BREAK );
+                    //printf( "Worker thread #[%d] -- Finished. Exit now. %s", ( int ) pArgList.pxID, LINE_BREAK );
 
                     return NULL;
 
@@ -222,14 +222,14 @@ static void * prvDispatcherThread( void * pvArgs )
     /* Distribute 1000 independent tasks to workers, in round-robin fashion. */
     pcSendBuffer[ 0 ] = ( char ) eWORKER_CTRL_MSG_CONTINUE;
 		
-		printf( "Dispatcher thread - start %s", LINE_BREAK );
+		//printf( "Dispatcher thread - start %s", LINE_BREAK );
 
     for( i = 0; i < totalNumOfJobsPerThread; i++ )
     {
         clock_gettime( CLOCK_REALTIME, &xSendTimeout );
         xSendTimeout.tv_sec += MQUEUE_TIMEOUT_SECONDS;
 
-        printf( "Dispatcher iteration #[%d] -- Sending msg to worker thread #[%d]. %s", i, ( int ) pArgList.pOutboxID[ i % MQUEUE_NUMBER_OF_WORKERS ], LINE_BREAK );
+        //printf( "Dispatcher iteration #[%d] -- Sending msg to worker thread #[%d]. %s", i, ( int ) pArgList.pOutboxID[ i % MQUEUE_NUMBER_OF_WORKERS ], LINE_BREAK );
 
         xMessageSize = mq_timedsend( pArgList.pOutboxID[ i % MQUEUE_NUMBER_OF_WORKERS ],
                                      pcSendBuffer,
@@ -242,8 +242,8 @@ static void * prvDispatcherThread( void * pvArgs )
             /* This error is acceptable in our setup.
              * Since inbox for each thread fits only one message.
              * In reality, balance inbox size, message arrival rate, and message drop rate. */
-            printf( "An acceptable failure -- dispatcher failed to send eWORKER_CTRL_MSG_CONTINUE to outbox ID: %x. errno %d %s",
-                    ( int ) pArgList.pOutboxID[ i % MQUEUE_NUMBER_OF_WORKERS ], errno, LINE_BREAK );
+            //printf( "An acceptable failure -- dispatcher failed to send eWORKER_CTRL_MSG_CONTINUE to outbox ID: %x. errno %d %s",
+            //        ( int ) pArgList.pOutboxID[ i % MQUEUE_NUMBER_OF_WORKERS ], errno, LINE_BREAK );
         }
     }
 
@@ -252,7 +252,7 @@ static void * prvDispatcherThread( void * pvArgs )
 
     for( i = 0; i < MQUEUE_NUMBER_OF_WORKERS; i++ )
     {
-        printf( "Dispatcher [%d] -- Sending eWORKER_CTRL_MSG_EXIT to worker thread #[%d]. %s", i, ( int ) pArgList.pOutboxID[ i % MQUEUE_NUMBER_OF_WORKERS ], LINE_BREAK );
+        //printf( "Dispatcher [%d] -- Sending eWORKER_CTRL_MSG_EXIT to worker thread #[%d]. %s", i, ( int ) pArgList.pOutboxID[ i % MQUEUE_NUMBER_OF_WORKERS ], LINE_BREAK );
 
         /* This is a blocking call, to guarantee worker thread exits. */
         xMessageSize = mq_send( pArgList.pOutboxID[ i % MQUEUE_NUMBER_OF_WORKERS ],
@@ -312,7 +312,7 @@ void vStartPOSIXDemo( void *pvParameters )
 
         if( pxWorkers[ i ].xInboxID == ( mqd_t ) -1 )
         {
-            printf( "Invalid inbox (mqueue) for worker. %s", LINE_BREAK );
+            //printf( "Invalid inbox (mqueue) for worker. %s", LINE_BREAK );
             iStatus = DEMO_ERROR;
             break;
         }
@@ -361,11 +361,11 @@ void vStartPOSIXDemo( void *pvParameters )
     /* Have something on console. */
     if( iStatus == 0 )
     {
-        printf( "All threads finished. %s", LINE_BREAK );
+        //printf( "All threads finished. %s", LINE_BREAK );
     }
     else
     {
-        printf( "Queues did not get initialized properly. Did not run demo. %s", LINE_BREAK );
+        //printf( "Queues did not get initialized properly. Did not run demo. %s", LINE_BREAK );
     }
 
 	/* This task was created with the native xTaskCreate() API function, so

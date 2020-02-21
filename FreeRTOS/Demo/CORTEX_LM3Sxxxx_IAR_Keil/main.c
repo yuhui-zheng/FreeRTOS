@@ -222,7 +222,8 @@ int main( void )
 	/* Start the tasks defined within this file/specific to this demo. */
 	xTaskCreate( vOLEDTask, "OLED", mainOLED_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
 	
-	vStartPOSIXDemo(NULL);
+	/* Start the task to run POSIX demo */
+	xTaskCreate( vStartPOSIXDemo, "posix", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
 
 	/* Uncomment the following line to configure the high frequency interrupt
 	used to measure the interrupt jitter time.
