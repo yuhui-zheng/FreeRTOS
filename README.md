@@ -1,26 +1,53 @@
-## Getting started
-The easiest way to use FreeRTOS is to start with one of the pre-configured demo application projects (found in the FreeRTOS/Demo directory).  That way you will have the correct FreeRTOS source files included, and the correct include paths configured.  Once a demo application is building and executing you can remove the demo application files, and start to add in your own application source files.  See the [FreeRTOS Kernel Quick Start Guide](https://www.freertos.org/FreeRTOS-quick-start-guide.html) for detailed instructions and other useful links.
+## Note on the branch qemu_posix_LM3S6965
+This branch is a show case for FreeRTOS+POSIX running on top of QEMU LM3S6965 port. This is not an official release.
 
-Additionally, for FreeRTOS kernel feature information refer to the [Developer Documentation](https://www.freertos.org/features.html), and [API Reference](https://www.freertos.org/a00106.html).
+Project is located at ```/FreeRTOS/FreeRTOS/Demo/CORTEX_LM3Sxxxx_IAR_Keil/RTOSDemo.uvproj```.
 
-### Getting help
-If you have any questions or need assistance troubleshooting your FreeRTOS project, we have an active community that can help on the [FreeRTOS Community Support Forum](https://forums.freertos.org).
+**Keil IDE**: Keil MDK 5.29
 
-## Repository structure
-This repository contains the FreeRTOS Kernel, a number of supplementary libraries, and a comprehensive set of example applications.
+**ARM compiler**: ARMCC/ARMASM/.. V5.06 update 6 (build 750)
 
-### Kernel sources
-The FreeRTOS Kernel Source is located under [FreeRTOS/Source](https://github.com/FreeRTOS/FreeRTOS/tree/master/FreeRTOS/Source)
+**C dialect**: C99
 
-Hardware specific ports can be found under [FreeRTOS/Source/portable](https://github.com/FreeRTOS/FreeRTOS/tree/master/FreeRTOS/Source/portable)
+**QEMU version**: 4.02, running on Windows 64-bit
 
-A number of Demo projects can be found under [FreeRTOS/Demo](https://github.com/FreeRTOS/FreeRTOS/tree/master/FreeRTOS/Demo)
+### To reproduce:
+- compile project. 
+- open a terminal window, cd into 
 
-### Supplementary library sources
-The [FreeRTOS-Plus/Source](https://github.com/FreeRTOS/FreeRTOS/tree/master/FreeRTOS-Plus/Source) directory contains source code for some of the FreeRTOS+ components, as well as select partner provided libraries. These subdirectories contain further readme files and links to documentation.
+```
+<path to repository>/FreeRTOS/FreeRTOS/Demo/CORTEX_LM3Sxxxx_IAR_Keil
+```
 
-[FreeRTOS-Labs](https://github.com/FreeRTOS/FreeRTOS/tree/master/FreeRTOS-Labs) contains libraries and demos that are fully functional, but undergoing optimizations or refactorization to improve memory usage, modularity,
-documentation, demo usability, or test coverage.  At this time the projects ARE A WORK IN PROGRESS and will be released in the main FreeRTOS directories of the download following full review and completion of the documentation.
+- in the terminal window, start QEMU with 
+
+```
+qemu-system-arm -machine lm3s6965evb -s -kernel rvmdk/RTOSDemo.axf
+```
+
+You shall see QEMU window pops up. This demo uses both emulated OLED and UART. OLED view could be accessed via "View -> ssd0302"; while UART view could be accessed via "View -> serial0". Demo periodically writes to OLED, and only POSIX tasks write to UART (UART log will stop once POSIX demo finishes). 
+
+### To debug your application, similar as to above procedure:
+- open two terminal windows, cd into 
+
+```
+<path to repository>/FreeRTOS/FreeRTOS/Demo/CORTEX_LM3Sxxxx_IAR_Keil
+```
+
+- in a terminal window, start QEMU with 
+
+```
+qemu-system-arm -machine lm3s6965evb -s -S -kernel rvmdk/RTOSDemo.axf
+```
+
+- assume you have [ARM toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm) installed. in a second terminal window, start gdb with
+
+```
+ arm-none-eabi-gdb -q ./rvmdk/RTOSDemo.axf
+```
+Step as you would normally do with GDB.
+
+
 
 ## Cloning this repository
 This repo uses [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to bring in dependent components.
@@ -40,6 +67,3 @@ If you have downloaded the repo without using the `--recurse-submodules` argumen
 ```
 git submodule update --init --recursive
 ```
-
-## Previous releases
-Previous releases are available for download under [releases](https://github.com/FreeRTOS/FreeRTOS/releases).
