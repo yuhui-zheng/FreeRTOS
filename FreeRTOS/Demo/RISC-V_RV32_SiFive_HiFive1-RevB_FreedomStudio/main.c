@@ -48,6 +48,8 @@
  *
  */
 
+#include <stdint.h>
+
 /* FreeRTOS kernel includes. */
 #include <FreeRTOS.h>
 #include <task.h>
@@ -55,6 +57,12 @@
 /* Freedom metal driver includes. */
 #include <metal/cpu.h>
 #include <metal/led.h>
+#include <metal/pmp.h>
+
+/* Include CRC function header. */
+#include "crc32.h"
+
+extern const uint32_t crc32_table[];
 
 /* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to one to run the simple blinky demo,
 or 0 to run the more comprehensive test and demo application. */
@@ -63,11 +71,21 @@ or 0 to run the more comprehensive test and demo application. */
 /* Index to first HART (there is only one). */
 #define mainHART_0 		0
 
+/* mcause interrupt exception code.
+Below needs to be implemented as branches under is_exception tag. */
+#define ECODE_LOAD_MISALIGNED		4	/* Load address misaligned. */
+#define ECODE_LOAD_FAULT			5	/* Load access fault. */
+#define ECODE_STORE_MISALIGNED		6	/* Store/AMO address misaligned. */
+#define ECODE_STORE_FAULT			7	/* Store/AMO access fault. */
+
 /* Registers used to initialise the PLIC. */
 #define mainPLIC_PENDING_0 ( * ( ( volatile uint32_t * ) 0x0C001000UL ) )
 #define mainPLIC_PENDING_1 ( * ( ( volatile uint32_t * ) 0x0C001004UL ) )
 #define mainPLIC_ENABLE_0  ( * ( ( volatile uint32_t * ) 0x0C002000UL ) )
 #define mainPLIC_ENABLE_1  ( * ( ( volatile uint32_t * ) 0x0C002004UL ) )
+
+/* PMP naturally aligned power of 2 block size. */
+#define mainPMP_NAPOT_SIZE 256
 
 /*-----------------------------------------------------------*/
 
@@ -100,6 +118,46 @@ static void prvSetupHardware( void );
  */
 static struct metal_led *pxBlueLED = NULL;
 
+static void prvLoadAcceseFaultHandler( struct metal_cpu *pxCPU, int lErrCode )
+{
+	/* Get faulting instruction and instruction length */
+	uint32_t ulExceptionPC = metal_cpu_get_exception_pc( pxCPU );
+	uint32_t ulInstructionLength = metal_cpu_get_instruction_length( pxCPU, ulExceptionPC );
+
+	/* Advance the exception program counter by the length of the
+	 * instruction to return execution after the faulting store */
+	metal_cpu_set_exception_pc( pxCPU, ulExceptionPC + ulInstructionLength );
+
+	if( lErrCode == ECODE_LOAD_FAULT )
+	{
+		/* Do something. */
+	}
+	else
+	{
+		/* Not store fault. Let it go. */
+	}
+}
+
+static void prvStoreAcceseFaultHandler( struct metal_cpu *pxCPU, int lErrCode )
+{
+	/* Get faulting instruction and instruction length */
+	uint32_t ulExceptionPC = metal_cpu_get_exception_pc( pxCPU );
+	uint32_t ulInstructionLength = metal_cpu_get_instruction_length( pxCPU, ulExceptionPC );
+
+	/* Advance the exception program counter by the length of the
+	 * instruction to return execution after the faulting store */
+	metal_cpu_set_exception_pc( pxCPU, ulExceptionPC + ulInstructionLength );
+
+	if( lErrCode == ECODE_STORE_FAULT )
+	{
+		/* Do something. */
+	}
+	else
+	{
+		/* Not store fault. Let it go. */
+	}
+}
+
 /*-----------------------------------------------------------*/
 
 int main( void )
@@ -123,7 +181,42 @@ int main( void )
 static void prvSetupHardware( void )
 {
 struct metal_cpu *pxCPU;
+struct metal_pmp *pxPMP;
 struct metal_interrupt *pxInterruptController;
+int lRetVal;
+uint32_t ulCrcResultBefore, ulCrcResultAfter;
+uint8_t pcCrcBuffBefore[4] = { 0 };
+uint8_t pcCrcBuffAfter[4] = { 0 };
+uint32_t * pCrc32Loc;
+
+size_t xProtectedAddress;
+
+uint32_t ulRegMcycle, ulRegMinstret, ulRegMcycleh, ulRegMinstreth;
+uint64_t ullMcycleBefore, ullMcycleAfter, ullMinstretBefore, ullMinstretAfter;
+
+/* Configure read-only, naturally aligned power of 2 region. The PMP region is
+locked so that the configuration applies to M-mode accesses. */
+struct metal_pmp_config xConfigReadOnly =
+	{
+		.L = METAL_PMP_LOCKED,
+		.A = METAL_PMP_NAPOT,
+		.X = 0,
+		.W = 0,
+		.R = 1,
+	};
+
+	/* PMP addresses are 4-byte aligned, drop the bottom two bits */
+	xProtectedAddress = ((size_t) &crc32_table) >> 2;
+
+	/* Clear the bit corresponding with alignment */
+	xProtectedAddress &= ~(xProtectedAddress >> 3);
+
+	/* Set the bits up to the alignment bit */
+	xProtectedAddress |= ((xProtectedAddress >> 3) - 1);
+
+	/* Get CPU handle associated to the hart. */
+	pxCPU = metal_cpu_get( mainHART_0 );
+	configASSERT( pxCPU );
 
 	/* Initialise the blue LED. */
 	pxBlueLED = metal_led_get_rgb( "LD0", "blue" );
@@ -132,11 +225,13 @@ struct metal_interrupt *pxInterruptController;
 	metal_led_off( pxBlueLED );
 
 	/* Initialise the interrupt controller. */
-	pxCPU = metal_cpu_get( mainHART_0 );
-	configASSERT( pxCPU );
 	pxInterruptController = metal_cpu_interrupt_controller( pxCPU );
 	configASSERT( pxInterruptController );
 	metal_interrupt_init( pxInterruptController );
+
+	/* Register load/store access fault exception handler. */
+	metal_cpu_exception_register( pxCPU, ECODE_LOAD_FAULT, prvLoadAcceseFaultHandler);
+	metal_cpu_exception_register( pxCPU, ECODE_STORE_FAULT, prvStoreAcceseFaultHandler);
 
 	/* Set all interrupt enable bits to 0. */
 	mainPLIC_ENABLE_0 = 0UL;
@@ -145,6 +240,55 @@ struct metal_interrupt *pxInterruptController;
 	/* Clear all pending interrupts. */
 	mainPLIC_PENDING_0 = 0UL;
 	mainPLIC_PENDING_1 = 0UL;
+
+	/* Initialize PMP. */
+	pxPMP = metal_pmp_get_device();
+	configASSERT( pxPMP );
+
+	/* The chip has not define power on reset value, thus all PMP registers are set
+	to known value in initialization routine. */
+	metal_pmp_init( pxPMP );
+
+	//lRetVal = metal_pmp_set_region( pxPMP, 0, xConfigReadOnly, xProtectedAddress );
+
+	/* Get number of CPU cycles and number of instructions returned before CRC32. */
+	__asm volatile(
+			"csrr %0, mcycle	\n"
+			"csrr %1, mcycleh	\n"
+			"csrr %2, minstret	\n"
+			"csrr %3, minstreth	\n"
+			: "=r"( ulRegMcycle ), "=r"( ulRegMcycleh ), "=r"( ulRegMinstret ), "=r"( ulRegMinstreth )
+			:: "memory");
+
+	ullMcycleBefore = ulRegMcycleh;
+	ullMcycleBefore = ( ullMcycleBefore << 32 ) | ulRegMcycle;
+	ullMinstretBefore = ulRegMinstreth;
+	ullMinstretBefore = ( ullMinstretBefore << 32 ) | ulRegMinstret;
+
+	/* Use default table. */
+	ulCrcResultBefore = xcrc32( pcCrcBuffBefore, 128, 0xffffffff );
+
+	pCrc32Loc = ( crc32_table + 5 );
+	*pCrc32Loc = 0x0;	/* If read only, triggers write fault. */
+
+	/* Use the modified table. */
+	ulCrcResultAfter = xcrc32( pcCrcBuffAfter, 128 , 0xffffffff );
+
+	/* Get number of CPU cycles and number of instructions returned after CRC32. */
+	__asm volatile(
+			"csrr %0, mcycle	\n"
+			"csrr %1, mcycleh	\n"
+			"csrr %2, minstret	\n"
+			"csrr %3, minstreth	\n"
+			: "=r"( ulRegMcycle ), "=r"( ulRegMcycleh ), "=r"( ulRegMinstret ), "=r"( ulRegMinstreth )
+			:: "memory");
+
+	ullMcycleAfter = ulRegMcycleh;
+	ullMcycleAfter = ( ullMcycleAfter << 32 ) | ulRegMcycle;
+	ullMinstretAfter = ulRegMinstreth;
+	ullMinstretAfter = ( ullMinstretAfter << 32 ) | ulRegMinstret;
+
+	return;
 }
 /*-----------------------------------------------------------*/
 
