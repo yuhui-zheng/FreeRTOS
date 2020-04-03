@@ -1,7 +1,8 @@
-
 #ifndef CRC32_H
 #define CRC32_H
 
-unsigned int xcrc32 (const unsigned char *buf, int len, unsigned int init) __attribute__((section(".crc32")));
+#include <stdint.h>
+
+uint32_t xcrc32 (const uint8_t *buf, uint32_t len, uint32_t init) __attribute__((section(".crc32")));
 
 #endif /* CRC32_H */
