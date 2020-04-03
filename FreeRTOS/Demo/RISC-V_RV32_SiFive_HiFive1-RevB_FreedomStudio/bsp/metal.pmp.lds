@@ -11,15 +11,16 @@ MEMORY
 {
 	ram (wxa!ri) : ORIGIN = 0x80000000, LENGTH = 0x4000
 	flash (rxai!w) : ORIGIN = 0x20010000, LENGTH = 0x6a120
+	itim (wx!rai) : ORIGIN = 0x8000000, LENGTH = 0x2000
 }
 
 PHDRS
 {
 	flash PT_LOAD;
+	ram PT_LOAD;
 	ram_init PT_LOAD;
+	itim PT_LOAD;
 	itim_init PT_LOAD;
-	ram PT_NULL;
-	itim PT_NULL;
 }
 
 SECTIONS
@@ -201,10 +202,13 @@ SECTIONS
 
 	.stack 		: 
 	{
-		PROVIDE(metal_segment_stack_begin = .);
+		. = ALIGN(16);
+		PROVIDE( metal_segment_stack_begin = . );
 		. += __stack_size;
-		PROVIDE( _sp = . );
-		PROVIDE(metal_segment_stack_end = .);
+		. = ALIGN(16);
+		_sp = .;		
+		PROVIDE( metal_segment_stack_end = . );
+		__freertos_irq_stack_top = .;
 	} >ram AT>ram :ram
 
 
