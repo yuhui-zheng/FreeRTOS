@@ -9,9 +9,9 @@ ENTRY(_enter)
 
 MEMORY
 {
-	ram (wxa!ri) : ORIGIN = 0x80000000, LENGTH = 0x4000
 	flash (rxai!w) : ORIGIN = 0x20010000, LENGTH = 0x6a120
 	itim (wx!rai) : ORIGIN = 0x8000000, LENGTH = 0x2000
+	ram (wxa!ri) : ORIGIN = 0x80000000, LENGTH = 0x4000
 }
 
 PHDRS
@@ -46,7 +46,6 @@ SECTIONS
 		*(.text.unlikely .text.unlikely.*)
 		*(.text.startup .text.startup.*)
 		*(.text .text.*)
-		*(.itim .itim.*)
 		*(.gnu.linkonce.t.*)
 	} >flash AT>flash :flash
 
@@ -69,10 +68,8 @@ SECTIONS
 	PROVIDE (_etext = .);
 	PROVIDE (etext = .);
 
-
-	.rodata 		: ALIGN(4)
+	.rodata 		:
 	{
-		_rodata = .;
 		*(.rdata)
 		*(.rodata .rodata.*)
 		*(.gnu.linkonce.r.*)
@@ -157,6 +154,7 @@ SECTIONS
 		*(.itim .itim.*)
 	} >itim AT>flash :itim_init
 
+
 	PROVIDE( metal_segment_itim_source_start = LOADADDR(.itim) );
 	PROVIDE( metal_segment_itim_target_start = ADDR(.itim) );
 	PROVIDE( metal_segment_itim_target_end = ADDR(.itim) + SIZEOF(.itim) );
@@ -170,16 +168,6 @@ SECTIONS
 		PROVIDE( __global_pointer$ = . + 0x800 );
 		*(.sdata .sdata.* .sdata2.*)
 		*(.gnu.linkonce.s.*)
-		. = ALIGN(8);
-		*(.srodata.cst16)
-		*(.srodata.cst8)
-		*(.srodata.cst4)
-		*(.srodata.cst2)
-		*(.srodata .srodata.*)
-		. = ALIGN(8);
-		*(.rdata)
-		*(.rodata .rodata.*)
-		*(.gnu.linkonce.r.*)
 	} >ram AT>flash :ram_init
 
 	PROVIDE( metal_segment_data_source_start = LOADADDR(.data) );
