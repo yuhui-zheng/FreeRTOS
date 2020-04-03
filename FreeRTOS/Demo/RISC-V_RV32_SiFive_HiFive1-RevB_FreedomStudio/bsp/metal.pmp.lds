@@ -151,46 +151,17 @@ SECTIONS
 	} >flash AT>flash :flash
 
 
-	.litimalign 		:
-	{
-		. = ALIGN(4);
-		PROVIDE( metal_segment_itim_source_start = . );
-	} >flash AT>flash :flash
-
-
-	.ditimalign 		:
-	{
-		. = ALIGN(4);
-		PROVIDE( metal_segment_itim_target_start = . );
-	} >ram AT>flash :ram_init
-
-
-	.itim 		:
+	.itim		:	ALIGN(8) 
 	{
 		*(.itim .itim.*)
-	} >flash AT>flash :flash
+	} >itim AT>flash :itim_init
+
+	PROVIDE( metal_segment_itim_source_start = LOADADDR(.itim) );
+	PROVIDE( metal_segment_itim_target_start = ADDR(.itim) );
+	PROVIDE( metal_segment_itim_target_end = ADDR(.itim) + SIZEOF(.itim) );
 
 
-	. = ALIGN(8);
-	PROVIDE( metal_segment_itim_target_end = . );
-
-
-	.lalign 		:
-	{
-		. = ALIGN(4);
-		PROVIDE( _data_lma = . );
-		PROVIDE( metal_segment_data_source_start = . );
-	} >flash AT>flash :flash
-
-
-	.dalign 		:
-	{
-		. = ALIGN(4);
-		PROVIDE( metal_segment_data_target_start = . );
-	} >ram AT>flash :ram_init
-
-
-	.data 		:
+	.data		:	ALIGN(8) 
 	{
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -198,54 +169,52 @@ SECTIONS
 		PROVIDE( __global_pointer$ = . + 0x800 );
 		*(.sdata .sdata.* .sdata2.*)
 		*(.gnu.linkonce.s.*)
+		. = ALIGN(8);
+		*(.srodata.cst16)
+		*(.srodata.cst8)
+		*(.srodata.cst4)
+		*(.srodata.cst2)
+		*(.srodata .srodata.*)
+		. = ALIGN(8);
+		*(.rdata)
+		*(.rodata .rodata.*)
+		*(.gnu.linkonce.r.*)
 	} >ram AT>flash :ram_init
 
-
-	. = ALIGN(4);
-	PROVIDE( _edata = . );
-	PROVIDE( edata = . );
-	PROVIDE( metal_segment_data_target_end = . );
-	PROVIDE( _fbss = . );
-	PROVIDE( __bss_start = . );
-	PROVIDE( metal_segment_bss_target_start = . );
+	PROVIDE( metal_segment_data_source_start = LOADADDR(.data) );
+	PROVIDE( metal_segment_data_target_start = ADDR(.data) );
+	PROVIDE( metal_segment_data_target_end = ADDR(.data) + SIZEOF(.data) );
 
 
-	.bss 		:
+	.bss		:	ALIGN(8) 
 	{
 		*(.sbss*)
 		*(.gnu.linkonce.sb.*)
 		*(.bss .bss.*)
 		*(.gnu.linkonce.b.*)
 		*(COMMON)
-		. = ALIGN(4);
 	} >ram AT>ram :ram
 
+	PROVIDE( metal_segment_bss_target_start = ADDR(.bss) );
+	PROVIDE( metal_segment_bss_target_end = ADDR(.bss) + SIZEOF(.bss) );
 
-	. = ALIGN(8);
-	PROVIDE( _end = . );
-	PROVIDE( end = . );
-	PROVIDE( metal_segment_bss_target_end = . );
 
-	.stack :
+	.stack 		: 
 	{
-		. = ALIGN(16);
-		metal_segment_stack_begin = .;
+		PROVIDE(metal_segment_stack_begin = .);
 		. += __stack_size;
-		. = ALIGN(16);
-		_sp = .;		
+		PROVIDE( _sp = . );
 		PROVIDE(metal_segment_stack_end = .);
-		__freertos_irq_stack_top = .;
 	} >ram AT>ram :ram
 
 
-	.heap :
+	.heap		: 
 	{
 		PROVIDE( metal_segment_heap_target_start = . );
 		. = __heap_size;
 		PROVIDE( metal_segment_heap_target_end = . );
 		PROVIDE( _heap_end = . );
 	} >ram AT>ram :ram
-
 
 }
 
