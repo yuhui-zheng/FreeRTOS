@@ -59,11 +59,11 @@
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/FreeRTOS_Source/portable/GCC/RISC-V}&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/FreeRTOS_Source/include}&quot;"/>
-                                    									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freedom-metal}&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/bsp/install/include}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/crc32_demo}&quot;"/>
                                     								
                                 </option>
                                 								
@@ -85,7 +85,7 @@
                             							
                             <tool command="riscv64-unknown-elf-gcc.exe" id="cdt.managedbuild.tool.gnu.cross.c.linker.558060359" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker">
                                 								
-                                <option id="gnu.c.link.option.ldflags.46965227" name="Linker flags" superClass="gnu.c.link.option.ldflags" useByScannerDiscovery="false" value="-Xlinker --gc-sections -Wl,-Map,RTOSDemo.map -T../bsp/metal.default.lds -march=rv32imac -mabi=ilp32 -mcmodel=medlow -Wl,--start-group -lc -lgcc -Wl,--end-group --specs=nano.specs" valueType="string"/>
+                                <option id="gnu.c.link.option.ldflags.46965227" name="Linker flags" superClass="gnu.c.link.option.ldflags" useByScannerDiscovery="false" value="-Xlinker --gc-sections -Wl,-Map,RTOSDemo.map -T../bsp/metal.pmp.lds -march=rv32imac -mabi=ilp32 -mcmodel=medlow -Wl,--start-group -lc -lgcc -Wl,--end-group --specs=nano.specs" valueType="string"/>
                                 								
                                 <option id="gnu.c.link.option.nostart.1038463237" name="Do not use standard start files (-nostartfiles)" superClass="gnu.c.link.option.nostart" useByScannerDiscovery="false" value="true" valueType="boolean"/>
                                 								
@@ -172,5 +172,7 @@
         </configuration>
         	
     </storageModule>
+    	
+    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
     
 </cproject>
