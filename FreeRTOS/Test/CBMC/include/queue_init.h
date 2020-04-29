@@ -61,13 +61,14 @@ QueueHandle_t xUnconstrainedQueueBoundedItemSize( UBaseType_t uxItemSizeBound ) 
 	UBaseType_t uxQueueLength;
 	UBaseType_t uxItemSize;
 	uint8_t ucQueueType;
-	__CPROVER_assume(uxQueueLength > 0);
+
 	__CPROVER_assume(uxItemSize < uxItemSizeBound);
 
-	// QueueGenericCreate method does not check for multiplication overflow
-	size_t uxQueueStorageSize;
-	__CPROVER_assume(uxQueueStorageSize < CBMC_OBJECT_MAX_SIZE);
-	__CPROVER_assume(uxItemSize < uxQueueStorageSize/uxQueueLength);
+	/* Hitting assertion in QueueGenericCreate is not an interesting case for memory safefy proof. */
+	__CPROVER_assume(uxQueueLength > 0);
+
+	/* QueueGenericCreate method does not check for multiplication overflow. */
+	__CPROVER_assume(uxQueueLength < (CBMC_OBJECT_MAX_SIZE/uxItemSize));
 
 	QueueHandle_t xQueue = xQueueGenericCreate(uxQueueLength, uxItemSize, ucQueueType);
 	__CPROVER_assume(xQueue);
