@@ -46,6 +46,21 @@ void harness(){
 	vInitTaskCheckForTimeOut(0, QUEUE_PEEK_BOUND - 1);
 
 	QueueHandle_t xQueue = xUnconstrainedQueueBoundedItemSize(10);
+	__CPROVER_assume(xQueue);
+	
+	xQueue->cTxLock = nondet_int8_t();
+	xQueue->cRxLock = nondet_int8_t();
+	xQueue->uxLength = nondet_UBaseType_t();
+	xQueue->uxMessagesWaiting = nondet_UBaseType_t();
+
+	/* This is an invariant checked with a couple of asserts in the code base.
+	If it is false from the beginning, the CBMC proofs are not able to succeed*/
+	__CPROVER_assume(xQueue->uxMessagesWaiting < xQueue->uxLength);
+	xQueue->xTasksWaitingToReceive.uxNumberOfItems = nondet_UBaseType_t();
+	xQueue->xTasksWaitingToSend.uxNumberOfItems = nondet_UBaseType_t();
+	#if( configUSE_QUEUE_SETS == 1)
+		xQueueAddToSet(xQueue, xUnconstrainedQueueSet());
+	#endif
 
 	void *pvItemToQueue = pvPortMalloc( xQueue->uxItemSize );
 	__CPROVER_assume( pvItemToQueue || xQueue->uxItemSize == 0 );
