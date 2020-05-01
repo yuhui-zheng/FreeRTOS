@@ -63,6 +63,9 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ){
 }
 
 void harness(){
+	/* This is for loop unwinding. */
+	vInitTaskCheckForTimeOut(0, QUEUE_RECEIVE_BOUND - 1);
+
 	xQueue = xUnconstrainedQueueBoundedItemSize(MAX_ITEM_SIZE);
 
 	void *pvBuffer = pvPortMalloc( xQueue->uxItemSize );

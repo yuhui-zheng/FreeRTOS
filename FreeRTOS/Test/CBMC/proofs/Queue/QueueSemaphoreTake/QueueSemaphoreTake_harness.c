@@ -32,8 +32,15 @@
 #include "tasksStubs.h"
 #include "cbmc.h"
 
+#ifndef SEM_TAKE_BOUND
+	#define SEM_TAKE_BOUND 4
+#endif
+
 void harness()
 {
+	/* This is for loop unwinding. */
+	vInitTaskCheckForTimeOut(0, SEM_TAKE_BOUND - 1);
+
 	QueueHandle_t xQueue = xUnconstrainedMutex();
 
 	TickType_t xTicksToWait;

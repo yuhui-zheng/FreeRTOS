@@ -33,7 +33,18 @@
 
 #include "cbmc.h"
 
+#ifndef LOCK_BOUND		
+	#define LOCK_BOUND 4		
+#endif		
+
+#ifndef QUEUE_PEEK_BOUND		
+	#define QUEUE_PEEK_BOUND 4		
+#endif
+
 void harness(){
+	/* This is for loop unwinding. */
+	vInitTaskCheckForTimeOut(0, QUEUE_PEEK_BOUND - 1);
+
 	QueueHandle_t xQueue = xUnconstrainedQueueBoundedItemSize(10);
 
 	void *pvItemToQueue = pvPortMalloc( xQueue->uxItemSize );
