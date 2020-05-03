@@ -55,6 +55,7 @@
 /* Freedom metal driver includes. */
 #include <metal/cpu.h>
 #include <metal/led.h>
+#include <metal/pmp.h>
 
 /* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to one to run the simple blinky demo,
 or 0 to run the more comprehensive test and demo application. */
@@ -96,6 +97,35 @@ void vApplicationTickHook( void );
 static void prvSetupHardware( void );
 
 /*
+ * Format base address for NAPOT address matching.
+ *
+ * NAPOT -- Naturally aligned power-of-two region, >= 8 bytes.
+ * In additional to this function, the underlying linker script used
+ * shall also have at least ALIGN(8) for the segment(s) to be protected.
+ *
+ * Examples for NAPOT address matching:
+ * 8-byte:  pmpaddr yyyy....yyy0
+ * 16-byte: pmpaddr yyyy....yy01
+ * 32-byte: pmpaddr yyyy....y011
+ * ...
+ */
+static size_t prvFormatPmpAddrMatchNapot( size_t ulBaseAddress, uint32_t ulNapotSize );
+
+/* Setup PMP config handle.
+ * pmpxcfg[7] 	L: PMP entry locked.
+ * pmpxcfg[4:3] A: PMP entry address matching mode.
+ * pmpxcfg[2]	X: executable.
+ * pmpxcfg[1]	W: writable.
+ * pmpxcfg[0]	R: readable.
+ */
+static void prvPmpAccessConfig( struct metal_pmp_config * xPmpConfigHandle,
+								enum metal_pmp_locked L,
+								enum metal_pmp_address_mode A,
+								int X,
+								int W,
+								int R );
+
+/*
  * Used by the Freedom Metal drivers.
  */
 static struct metal_led *pxBlueLED = NULL;
@@ -123,7 +153,21 @@ int main( void )
 static void prvSetupHardware( void )
 {
 struct metal_cpu *pxCPU;
+struct metal_pmp *pxPMP;
+struct metal_pmp_config xPmpConfig;
 struct metal_interrupt *pxInterruptController;
+
+size_t ulPmpBaseAddress;
+
+extern uint32_t * _privileged_data_start;
+extern uint32_t * _privileged_function_start;
+
+	/* This function initialises hardware in these steps:
+	 - peripheral power on initialization.
+	 - get the ID of the hart which is to be initialised.
+	 - memory setup.
+	 - enable interrupts.
+	 Interrupt handler is initialised right before scheduler starts. */
 
 	/* Initialise the blue LED. */
 	pxBlueLED = metal_led_get_rgb( "LD0", "blue" );
@@ -131,9 +175,35 @@ struct metal_interrupt *pxInterruptController;
 	metal_led_enable( pxBlueLED );
 	metal_led_off( pxBlueLED );
 
-	/* Initialise the interrupt controller. */
+	/* Get hart ID. */
 	pxCPU = metal_cpu_get( mainHART_0 );
 	configASSERT( pxCPU );
+
+	/* Setup physical memory protection. */
+	pxPMP = metal_pmp_get_device();
+	configASSERT( pxPMP );
+
+	metal_pmp_init( pxPMP );
+
+	/* Kernel functions:
+	   Full access to M-mode, no access to U-mode.
+	   .privileged_functions section takes 0x4a2e bytes.
+	   Thus with NAPOT alignment set block size to be 0x8000 bytes.
+	   todo: switch to U-mode. */
+	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( (size_t)_privileged_function_start, 0x8000 );
+	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_UNLOCKED, METAL_PMP_NAPOT, 0, 0, 0 );
+	metal_pmp_set_region( pxPMP, 0, xPmpConfig, ulPmpBaseAddress );
+
+	/* Kernel data:
+	   Full access to M-mode, no access to U-mode.
+	   .privilege_data section takes 0x1a8 bytes.
+	   Thus with NAPOT alignment set block size to be 512 bytes.
+	   todo: switch to U-mode. */
+	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( (size_t)_privileged_data_start, 0x200 );
+	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_UNLOCKED, METAL_PMP_NAPOT, 0, 0, 0 );
+	metal_pmp_set_region( pxPMP, 1, xPmpConfig, ulPmpBaseAddress );
+
+	/* Initialise the interrupt controller. */
 	pxInterruptController = metal_cpu_interrupt_controller( pxCPU );
 	configASSERT( pxInterruptController );
 	metal_interrupt_init( pxInterruptController );
@@ -141,6 +211,44 @@ struct metal_interrupt *pxInterruptController;
 	/* Set all interrupt enable bits to 0. */
 	mainPLIC_ENABLE_0 = 0UL;
 	mainPLIC_ENABLE_1 = 0UL;
+}
+/*-----------------------------------------------------------*/
+
+
+static size_t prvFormatPmpAddrMatchNapot( size_t ulBaseAddress, uint32_t ulNapotSize )
+{
+size_t ulTempAddress;
+
+	/* PMP addresses are 4-byte aligned, drop the bottom two bits */
+	ulTempAddress = ulBaseAddress >> 2;
+
+	/* Clear the bit corresponding with alignment */
+	ulTempAddress &= ~( ulNapotSize >> 3 );
+
+	/* Set the bits up to the alignment bit */
+	ulTempAddress |= ( ( ulNapotSize >> 3 ) - 1 );
+
+	return ulTempAddress;
+}
+/*-----------------------------------------------------------*/
+
+static void prvPmpAccessConfig( struct metal_pmp_config * xPmpConfigHandle,
+								enum metal_pmp_locked L,
+								enum metal_pmp_address_mode A,
+								int X,
+								int W,
+								int R )
+{
+	/* Since this is not intended to be an API, do not check inputs here.
+	 * L, A bits -- see enum definition.
+	 * X, W, R bits -- 1 to grant access, 0 to clear access. */
+	xPmpConfigHandle->L = L;
+	xPmpConfigHandle->A = A;
+	xPmpConfigHandle->X = X;
+	xPmpConfigHandle->W = W;
+	xPmpConfigHandle->R = R;
+
+	return;
 }
 /*-----------------------------------------------------------*/
 
