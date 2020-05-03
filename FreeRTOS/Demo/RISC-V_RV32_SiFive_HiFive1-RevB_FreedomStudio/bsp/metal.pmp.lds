@@ -196,7 +196,7 @@ SECTIONS
 
 	PROVIDE( metal_segment_data_source_start = LOADADDR(.privileged_data) );
 	PROVIDE( metal_segment_data_target_start = ADDR(.privileged_data) );
-	PROVIDE( metal_segment_data_target_end = ADDR(.data) + SIZEOF(.data) + SIZEOF(.privileged_data) );
+	PROVIDE( metal_segment_data_target_end = ADDR(.privileged_data) + SIZEOF(.data) + SIZEOF(.privileged_data) );
 
 
 	.bss 		:
