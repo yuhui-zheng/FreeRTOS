@@ -177,7 +177,7 @@ SECTIONS
 	{
 		_privileged_data_start = .;        
 		*(privileged_data)
-		. = ALIGN(4);
+		. = ALIGN(8);
 		FILL(0xDEAD);
 		/* Ensure that non-privileged data is placed after the region reserved for
 		 * privileged kernel data. */
@@ -194,10 +194,16 @@ SECTIONS
 		*(.gnu.linkonce.s.*)
 	} >ram AT>flash :ram_init
 
+	. = ALIGN(4);
+	PROVIDE( _edata = . );
+	PROVIDE( edata = . );
+
 	PROVIDE( metal_segment_data_source_start = LOADADDR(.privileged_data) );
 	PROVIDE( metal_segment_data_target_start = ADDR(.privileged_data) );
 	PROVIDE( metal_segment_data_target_end = ADDR(.privileged_data) + SIZEOF(.data) + SIZEOF(.privileged_data) );
 
+	PROVIDE( _fbss = . );
+	PROVIDE( __bss_start = . );
 
 	.bss 		:
 	{
@@ -211,6 +217,8 @@ SECTIONS
 
 
 	. = ALIGN(8);
+	PROVIDE( _end = . );
+	PROVIDE( end = . );
 	PROVIDE( metal_segment_bss_target_start = ADDR(.bss) );
 	PROVIDE( metal_segment_bss_target_end = ADDR(.bss) + SIZEOF(.bss) );
 
