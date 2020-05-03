@@ -40,9 +40,28 @@ SECTIONS
 		KEEP (*(.text.libgloss.start))
 	} >flash AT>flash :flash
 
+	/* FreeRTOS kernel function.
+	   In v10.3.0, the size of this section is 0x4a2e bytes which rounds up to 0x8000. 
+	   Thus, set forced output alignment to 0x8000 bytes. 
+	   The start address of this section will be used in PMP initialization.
+	   todo: M-mode R/X access, U-mode no access.
+	*/
+	.privileged_functions :		ALIGN(0x8000)
+ 	{
+ 		_privileged_function_start = .; 
+		KEEP(*(.isr_vector)) /* Startup code. */
+		. = ALIGN(4);
+		*(privileged_functions)
+		. = ALIGN(4);
+		FILL(0xDEAD);
+		/* Ensure that non-privileged code is placed after the region reserved for
+		 * privileged kernel code. */
+		. = ALIGN(0x8000);
+	} >flash AT>flash :flash
 
-	.text 		:			ALIGN(8)
+	.text 		:
 	{
+		_text_start = .;
 		*(.text.unlikely .text.unlikely.*)
 		*(.text.startup .text.startup.*)
 		*(.text .text.*)
@@ -137,23 +156,9 @@ SECTIONS
 		KEEP (*(.dtors))
 	} >flash AT>flash :flash
 
-
-	.litimalign 		:
+	.itim 		:
 	{
 		. = ALIGN(4);
-		PROVIDE( metal_segment_itim_source_start = . );
-	} >flash AT>flash :flash
-
-
-	.ditimalign 		:
-	{
-		. = ALIGN(4);
-		PROVIDE( metal_segment_itim_target_start = . );
-	} >ram AT>flash :ram_init
-
-
-	.itim 		:			ALIGN(8)
-	{
 		*(.itim .itim.*)
 	} >itim AT>flash :itim_init
 
@@ -162,22 +167,24 @@ SECTIONS
 	PROVIDE( metal_segment_itim_target_end = ADDR(.itim) + SIZEOF(.itim) );
 
 
-	.lalign 		:
+	/* FreeRTOS kernel data. 
+	   In v10.3.0, the size of this section is 0x1a8 bytes which rounds up to 0x200.
+	   Thus set forced output alignment to 0x200 bytes. 
+	   The start address of this section will be used in PMP initialization.
+	   todo: M-mode R/W access, U-mode no access.
+	*/
+	.privileged_data :		ALIGN(0x200)
 	{
+		_privileged_data_start = .;        
+		*(privileged_data)
 		. = ALIGN(4);
-		PROVIDE( _data_lma = . );
-		PROVIDE( metal_segment_data_source_start = . );
-	} >flash AT>flash :flash
-
-
-	.dalign 		:
-	{
-		. = ALIGN(4);
-		PROVIDE( metal_segment_data_target_start = . );
+		FILL(0xDEAD);
+		/* Ensure that non-privileged data is placed after the region reserved for
+		 * privileged kernel data. */
+		. = ALIGN(0x200);
 	} >ram AT>flash :ram_init
 
-
-	.data 		:			ALIGN(8)
+	.data 		:
 	{
 		*(.data .data.*)
 		*(.gnu.linkonce.d.*)
@@ -187,9 +194,9 @@ SECTIONS
 		*(.gnu.linkonce.s.*)
 	} >ram AT>flash :ram_init
 
-	PROVIDE( metal_segment_data_source_start = LOADADDR(.data) );
-	PROVIDE( metal_segment_data_target_start = ADDR(.data) );
-	PROVIDE( metal_segment_data_target_end = ADDR(.data) + SIZEOF(.data) );
+	PROVIDE( metal_segment_data_source_start = LOADADDR(.privileged_data) );
+	PROVIDE( metal_segment_data_target_start = ADDR(.privileged_data) );
+	PROVIDE( metal_segment_data_target_end = ADDR(.data) + SIZEOF(.data) + SIZEOF(.privileged_data) );
 
 
 	.bss 		:
@@ -204,9 +211,8 @@ SECTIONS
 
 
 	. = ALIGN(8);
-	PROVIDE( _end = . );
-	PROVIDE( end = . );
-	PROVIDE( metal_segment_bss_target_end = . );
+	PROVIDE( metal_segment_bss_target_start = ADDR(.bss) );
+	PROVIDE( metal_segment_bss_target_end = ADDR(.bss) + SIZEOF(.bss) );
 
 	.stack :
 	{
