@@ -59,7 +59,16 @@ SECTIONS
 		. = ALIGN(0x8000);
 	} >flash AT>flash :flash
 
-	.text 		:
+
+	/* The 0x10000 alignment is to make .text region fit into a PMP address matching rule. 
+	   The options here:
+	   - use more than one PMP region, so that minimize flash fragmentation. 
+	     Note that there are only 8 PMP regions on fe310-g002.
+	   - use one PMP region, with the understanding that .privileged_functions and .text may not be contiguous. 
+	     The in between flash addresses are not used.
+	   In either case, every time software is modified, user needs to come back and reassess whetehr the configuration is still correct.
+	*/
+	.text 		:			ALIGN(0x10000)
 	{
 		_text_start = .;
 		*(.text.unlikely .text.unlikely.*)
@@ -67,6 +76,7 @@ SECTIONS
 		*(.text .text.*)
 		*(.itim .itim.*)
 		*(.gnu.linkonce.t.*)
+		. = ALIGN(0x10000);
 	} >flash AT>flash :flash
 
 
@@ -184,6 +194,9 @@ SECTIONS
 		. = ALIGN(0x200);
 	} >ram AT>flash :ram_init
 
+	/* .data and .bss section HAVE TO be placed right after .privileged_data section.
+	   In the PMP entry for .data and .bss R/W only, TOR address matching with be used.
+	*/
 	.data 		:
 	{
 		*(.data .data.*)
