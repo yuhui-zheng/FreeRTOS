@@ -174,9 +174,9 @@ extern uint32_t _common_data_end;
 	/* This function initialises hardware in these steps:
 	 - peripheral power on initialization.
 	 - get the ID of the hart which is to be initialised.
-	 - memory setup.
+	 - memory protection setup.
 	 - enable interrupts.
-	 Interrupt handler is initialised right before scheduler starts.
+	 FreeRTOS interrupt handler is initialised right before scheduler starts.
 	 For now early_trap_vector is used to handle exceptions, see entry.S. */
 
 	/* Initialise the blue LED. */
@@ -256,6 +256,8 @@ extern uint32_t _common_data_end;
 	/* Set all interrupt enable bits to 0. */
 	mainPLIC_ENABLE_0 = 0UL;
 	mainPLIC_ENABLE_1 = 0UL;
+
+
 }
 /*-----------------------------------------------------------*/
 
@@ -264,7 +266,10 @@ static size_t prvFormatPmpAddrMatchNapot( size_t ulBaseAddress, uint32_t ulNapot
 {
 size_t ulTempAddress;
 
-	/* PMP addresses are 4-byte aligned, drop the bottom two bits */
+	/* Drop the bottom two bits, since:
+	   1- each PMP address register encodes bits [33: 2] of a 34-bit physical
+	      address for RV32.
+	   2- PMP addresses are 4-byte aligned. */
 	ulTempAddress = ulBaseAddress >> 2;
 
 	/* Clear the bit corresponding with alignment */
@@ -280,7 +285,10 @@ size_t ulTempAddress;
 
 static size_t prvFormatPmpAddrMatchTor( size_t ulBaseAddress )
 {
-	/* PMP addresses are 4-byte aligned, drop the bottom two bits */
+	/* Drop the bottom two bits, since:
+	   1- each PMP address register encodes bits [33: 2] of a 34-bit physical
+	      address for RV32.
+	   2- PMP addresses are 4-byte aligned. */
 	return ( ulBaseAddress >> 2 );
 }
 
