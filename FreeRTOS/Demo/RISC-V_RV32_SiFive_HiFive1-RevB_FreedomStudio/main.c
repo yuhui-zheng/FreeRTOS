@@ -111,6 +111,11 @@ static void prvSetupHardware( void );
  */
 static size_t prvFormatPmpAddrMatchNapot( size_t ulBaseAddress, uint32_t ulNapotSize );
 
+/*
+ * Format base address for TOR address matching.
+ */
+static size_t prvFormatPmpAddrMatchTor( size_t ulBaseAddress );
+
 /* Setup PMP config handle.
  * pmpxcfg[7] 	L: PMP entry locked.
  * pmpxcfg[4:3] A: PMP entry address matching mode.
@@ -159,15 +164,20 @@ struct metal_interrupt *pxInterruptController;
 
 size_t ulPmpBaseAddress;
 
-extern uint32_t * _privileged_data_start;
-extern uint32_t * _privileged_function_start;
+int iStatus;
+
+extern uint32_t _privileged_data_start;
+extern uint32_t _privileged_function_start;
+extern uint32_t _common_function_start;
+extern uint32_t _common_data_end;
 
 	/* This function initialises hardware in these steps:
 	 - peripheral power on initialization.
 	 - get the ID of the hart which is to be initialised.
 	 - memory setup.
 	 - enable interrupts.
-	 Interrupt handler is initialised right before scheduler starts. */
+	 Interrupt handler is initialised right before scheduler starts.
+	 For now early_trap_vector is used to handle exceptions, see entry.S. */
 
 	/* Initialise the blue LED. */
 	pxBlueLED = metal_led_get_rgb( "LD0", "blue" );
@@ -190,18 +200,53 @@ extern uint32_t * _privileged_function_start;
 	   .privileged_functions section takes 0x4a2e bytes.
 	   Thus with NAPOT alignment set block size to be 0x8000 bytes.
 	   todo: switch to U-mode. */
-	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( (size_t)_privileged_function_start, 0x8000 );
+	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( (size_t)&_privileged_function_start, 0x8000 );
 	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_UNLOCKED, METAL_PMP_NAPOT, 0, 0, 0 );
-	metal_pmp_set_region( pxPMP, 0, xPmpConfig, ulPmpBaseAddress );
+	iStatus = metal_pmp_set_region( pxPMP, 0, xPmpConfig, ulPmpBaseAddress );
+	configASSERT( iStatus == 0 );
+
+	/* .text section:
+	   For both M-mode and U-mode, R/X access only.
+	   .text is in flash and address range [0x2000_0000, 0x3FFFF_FFFF] has memory
+	   attribute Read/eXecute/Cacheable (no Write attribute). Thus, no harm is
+	   done even without PMP. The protection is more to catch anomaly instead of
+	   assuring no change to code at runtime. The exception handler could simply
+	   recover from this violation without any other action.
+
+	   Also note that every time code is modified, needs to check whether the
+	   section alignment is still correct. To be specific, all .text addresses
+	   need to fit in one PMP entry. */
+	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( (size_t)&_common_function_start, 0x10000 );
+	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_LOCKED, METAL_PMP_NAPOT, 1, 0, 1 );
+	iStatus = metal_pmp_set_region( pxPMP, 1, xPmpConfig, ulPmpBaseAddress );
+	configASSERT( iStatus == 0 );
 
 	/* Kernel data:
 	   Full access to M-mode, no access to U-mode.
 	   .privilege_data section takes 0x1a8 bytes.
 	   Thus with NAPOT alignment set block size to be 512 bytes.
 	   todo: switch to U-mode. */
-	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( (size_t)_privileged_data_start, 0x200 );
+	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( (size_t)&_privileged_data_start, 0x200 );
 	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_UNLOCKED, METAL_PMP_NAPOT, 0, 0, 0 );
-	metal_pmp_set_region( pxPMP, 1, xPmpConfig, ulPmpBaseAddress );
+	iStatus = metal_pmp_set_region( pxPMP, 2, xPmpConfig, ulPmpBaseAddress );
+	configASSERT( iStatus == 0 );
+
+	/* .data and .bss sections:
+	   For both M-mode and U-mode, R/W access only.
+	   This PMP entry HAS TO be placed RIGHT AFTER "kernel data". AND
+	   these sections HAVE TO be contiguous -- .privilege_data, .data, .bss
+	   Since:
+	   - RAM size is very limited. Using NAPOT/NA4 address matching results
+	     significant waste. Thus, use TOR address matching.
+	   - When TOR address matching is used, access to address within range
+	     pmpaddr[i-1] <= y <= pmpaddr[i] is allowed. Also, since address matching
+	     starts from the lowest numbered PMP entry, M-mode access to .privilege_data
+	     matches previous entry's privilege configuration. M/U-mode access to .data
+	     and .bss falls to this PMP entry. */
+	ulPmpBaseAddress = prvFormatPmpAddrMatchTor( (size_t)&_common_data_end );
+	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_LOCKED, METAL_PMP_TOR, 0, 1, 1 );
+	iStatus = metal_pmp_set_region( pxPMP, 3, xPmpConfig, ulPmpBaseAddress );
+	configASSERT( iStatus == 0 );
 
 	/* Initialise the interrupt controller. */
 	pxInterruptController = metal_cpu_interrupt_controller( pxCPU );
@@ -230,6 +275,15 @@ size_t ulTempAddress;
 
 	return ulTempAddress;
 }
+/*-----------------------------------------------------------*/
+
+
+static size_t prvFormatPmpAddrMatchTor( size_t ulBaseAddress )
+{
+	/* PMP addresses are 4-byte aligned, drop the bottom two bits */
+	return ( ulBaseAddress >> 2 );
+}
+
 /*-----------------------------------------------------------*/
 
 static void prvPmpAccessConfig( struct metal_pmp_config * xPmpConfigHandle,
