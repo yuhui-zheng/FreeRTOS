@@ -70,7 +70,6 @@ SECTIONS
 	*/
 	.text 		:			ALIGN(0x10000)
 	{
-		_text_start = .;
 		*(.text.unlikely .text.unlikely.*)
 		*(.text.startup .text.startup.*)
 		*(.text .text.*)
@@ -78,6 +77,10 @@ SECTIONS
 		*(.gnu.linkonce.t.*)
 		. = ALIGN(0x10000);
 	} >flash AT>flash :flash
+
+
+	/* Address used for PMP configuration, use ADDR instead of LOADADDR! */	
+	PROVIDE( _common_function_start = ADDR(.text) );
 
 
 	.fini 		:
@@ -184,8 +187,7 @@ SECTIONS
 	   todo: M-mode R/W access, U-mode no access.
 	*/
 	.privileged_data :		ALIGN(0x200)
-	{
-		_privileged_data_start = .;        
+	{ 
 		*(privileged_data)
 		. = ALIGN(8);
 		FILL(0xDEAD);
@@ -215,6 +217,9 @@ SECTIONS
 	PROVIDE( metal_segment_data_target_start = ADDR(.privileged_data) );
 	PROVIDE( metal_segment_data_target_end = ADDR(.privileged_data) + SIZEOF(.data) + SIZEOF(.privileged_data) );
 
+	/* Address used for PMP configuration, use ADDR instead of LOADADDR! */
+	PROVIDE( _privileged_data_start = ADDR(.privileged_data) );
+
 	PROVIDE( _fbss = . );
 	PROVIDE( __bss_start = . );
 
@@ -234,6 +239,9 @@ SECTIONS
 	PROVIDE( end = . );
 	PROVIDE( metal_segment_bss_target_start = ADDR(.bss) );
 	PROVIDE( metal_segment_bss_target_end = ADDR(.bss) + SIZEOF(.bss) );
+
+	/* Address used for PMP configuration, use ADDR instead of LOADADDR! */
+	PROVIDE( _common_data_end = ADDR(.bss) + SIZEOF(.bss) );
 
 	.stack :
 	{
