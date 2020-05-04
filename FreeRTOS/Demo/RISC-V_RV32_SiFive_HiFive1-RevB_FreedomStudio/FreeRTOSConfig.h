@@ -87,8 +87,7 @@
 #if ( configENABLE_PMP_SUPPORT == 1) 
 	#define PRIVILEGED_FUNCTION 	__attribute__((section("privileged_functions")))
 	#define PRIVILEGED_DATA 		__attribute__((section("privileged_data")))
-	//#define FREERTOS_SYSTEM_CALL 	__attribute__((section( "freertos_system_calls")))
-	#define FREERTOS_SYSTEM_CALL
+	#define FREERTOS_SYSTEM_CALL 	//__attribute__((section( "freertos_system_calls")))
 #endif 
 
 /* Set the following definitions to 1 to include the API function, or zero
