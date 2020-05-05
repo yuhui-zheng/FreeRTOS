@@ -130,6 +130,26 @@ static void prvPmpAccessConfig( struct metal_pmp_config * xPmpConfigHandle,
 								int W,
 								int R );
 
+/* A dummy function to increase a global variable.
+ * The hex values of this function will be used to perform code injection.
+ */
+uint16_t uCounter = 0;
+void prvIncGlobalCounter( void )
+{
+	uCounter += 1;
+}
+
+/* Copy over prvIncGlobalCounter() hex values into this block.
+ * Per RISC-V spec:
+ * Instructions are stored in memory as a sequence of 16-bit little-endian parcels,
+ * regardless of memory system endianness.
+ */
+uint16_t pxInstructionArray[] = { 0x1141, 0xc622, 0x0800, 0x17b7, 0x8000, 0xd783, 0xacc7, 0x0785,
+								  0x9713, 0x0107, 0x8341, 0x17b7, 0x8000, 0x9623, 0xace7, 0x0001,
+								  0x4432, 0x0141, 0x8082 };
+
+uint32_t ulDataAddr = (uint32_t) pxInstructionArray;
+
 /*
  * Used by the Freedom Metal drivers.
  */
@@ -172,12 +192,13 @@ extern uint32_t _common_function_start;
 extern uint32_t _common_data_end;
 
 	/* This function initialises hardware in these steps:
-	 - peripheral power on initialization.
-	 - get the ID of the hart which is to be initialised.
-	 - memory protection setup.
-	 - enable interrupts.
-	 FreeRTOS interrupt handler is initialised right before scheduler starts.
-	 For now early_trap_vector is used to handle exceptions, see entry.S. */
+	   - peripheral power on initialization.
+	   - get the ID of the hart which is to be initialised.
+	   - memory protection setup.
+	   - enable interrupts.
+	   FreeRTOS interrupt handler is initialised right before scheduler starts.
+	   For now early_trap_vector is used to handle exceptions, see entry.S.
+	*/
 
 	/* Initialise the blue LED. */
 	pxBlueLED = metal_led_get_rgb( "LD0", "blue" );
@@ -188,6 +209,26 @@ extern uint32_t _common_data_end;
 	/* Get hart ID. */
 	pxCPU = metal_cpu_get( mainHART_0 );
 	configASSERT( pxCPU );
+
+	/* Quick test, before setting up PMP.
+	   Processor is still in M-mode, access to privileged_* sections cannot be
+	   tested here. Though attempt to execute from .data/.bss will succeed, since
+	   RAM has memory attribute X/W/R before setting up PMP. Attempt to write to
+	   .text will fail, since flash has X/R attribute. PMP checking is in parallel
+	   to PMA checking.
+
+	   uCounter shall be incremented twice below.
+	*/
+	void (*pFuncIncGlobalCounter)(void) = &prvIncGlobalCounter;
+	__asm volatile("funct_call_start: nop");
+	(*pFuncIncGlobalCounter)();
+	__asm volatile("funct_call_end: nop");
+
+	pFuncIncGlobalCounter = (void (*)(void))pxInstructionArray;
+	__asm volatile("code_inject_start: nop");
+	(*pFuncIncGlobalCounter)();
+	__asm volatile("code_inject_end: nop");
+
 
 	/* Setup physical memory protection. */
 	pxPMP = metal_pmp_get_device();
@@ -257,6 +298,13 @@ extern uint32_t _common_data_end;
 	mainPLIC_ENABLE_0 = 0UL;
 	mainPLIC_ENABLE_1 = 0UL;
 
+	/* Quick test, after setting up PMP.
+	   Attempt to execute from .data will get exception. uCounter shall not be
+	   incremented.*/
+	pFuncIncGlobalCounter = (void (*)(void))pxInstructionArray;
+	__asm volatile("pmp_start: nop");
+	(*pFuncIncGlobalCounter)();
+	__asm volatile("pmp_end: nop");
 
 }
 /*-----------------------------------------------------------*/
