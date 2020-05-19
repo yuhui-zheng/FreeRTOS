@@ -157,6 +157,8 @@
       <Value>../utils/assembler</Value>
       <Value>../</Value>
       <Value>%24(PackRepoDir)\Atmel\AVR-Dx_DFP\1.0.21\include</Value>
+      <Value>../../../../Source/include</Value>
+      <Value>../../../../Source/portable/GCC/AVR_Dx</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
   <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
@@ -360,6 +362,9 @@
     <Compile Include="driver_isr.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="FreeRTOSConfig.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="include\atmel_start_pins.h">
       <SubType>compile</SubType>
     </Compile>
@@ -394,6 +399,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="regtest.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="regtest.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\bod.c">
