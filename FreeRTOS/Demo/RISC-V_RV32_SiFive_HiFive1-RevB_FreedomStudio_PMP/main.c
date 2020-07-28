@@ -56,6 +56,9 @@
 #include <metal/cpu.h>
 #include <metal/led.h>
 
+/* User defined memory protection scheme. */
+#include "pmp_initialization.h"
+
 /* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to one to run the simple blinky demo,
 or 0 to run the more comprehensive test and demo application. */
 #define mainCREATE_SIMPLE_BLINKY_DEMO_ONLY	0
@@ -105,6 +108,8 @@ static struct metal_led *pxBlueLED = NULL;
 int main( void )
 {
 	prvSetupHardware();
+
+	pmp_initialization();
 
 	/* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
 	of this file. */

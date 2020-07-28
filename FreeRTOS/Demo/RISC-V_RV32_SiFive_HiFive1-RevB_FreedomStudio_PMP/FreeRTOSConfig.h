@@ -99,4 +99,15 @@ header file. */
 void vAssertCalled( void );
 #define configASSERT( x ) if( ( x ) == 0 ) vAssertCalled()
 
+/* Enable PMP support */
+#define MPU_WRAPPERS_H /* We cannot use mpu_wrappers.h */
+#define configENABLE_PMP_SUPPORT		1
+
+/* Linker script needs to provide below section names with proper alignment. */
+#if ( configENABLE_PMP_SUPPORT == 1)
+	#define PRIVILEGED_FUNCTION 	__attribute__((section("privileged_functions")))
+	#define PRIVILEGED_DATA 		__attribute__((section("privileged_data")))
+	#define FREERTOS_SYSTEM_CALL 	//__attribute__((section( "freertos_system_calls")))
+#endif
+
 #endif /* FREERTOS_CONFIG_H */
