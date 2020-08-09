@@ -25,16 +25,12 @@
  * 1 tab == 4 spaces!
  */
 
+#ifndef PMP_INITIALIZATION_H
+#define PMP_INITIALIZATION_H
 
-/* Initialize global PMP entries.
- *
- * This function sets up global memory protection scheme for an application.
- * A PMP entry is locked if the check applies to M-mode, so that the rule cannot
- * be updated without a reboot. A PMP entry is not locked, if the check only needs
- * to apply to U-mode.
- *
- * Task specific memory protection rule shall not be included in this function.
- *
- * This function asserts on any error during setup.
- */
-void pmp_initialization( void );
+/* PMP initialization examples. */
+
+void pmp_initialization_M_mode_only( void );
+void pmp_initialization_U_mode_support( void );
+
+#endif /* PMP_INITIALIZATION_H */
