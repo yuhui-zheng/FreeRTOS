@@ -59,9 +59,19 @@
 /* User defined memory protection scheme. */
 #include "pmp_initialization.h"
 
-/* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to one to run the simple blinky demo,
-or 0 to run the more comprehensive test and demo application. */
-#define mainCREATE_SIMPLE_BLINKY_DEMO_ONLY	0
+/* Demo cases to show memory access violation. */
+#include "pmp_demo_memory_violation.h"
+
+/* Select which demo to run at compile time.
+ * Set mainDEMO_SELECTION to
+ * 1 -- blinky demo.
+ * 2 -- more comprehensive test and demo application.
+ * 3 -- RISC-V M-mode memory access violation demo.
+ * 4 -- RISC-V M-mode/U-mode memory access violation demo.
+ *
+ * 3 and 4 are separated from regular demo to show the exception paths.
+ */
+#define mainDEMO_SELECTION	3
 
 /* Index to first HART (there is only one). */
 #define mainHART_0 		0
@@ -74,15 +84,9 @@ or 0 to run the more comprehensive test and demo application. */
 
 /*-----------------------------------------------------------*/
 
-/*
- * main_blinky() is used when mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is set to 1.
- * main_full() is used when mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is set to 0.
- */
-#if mainCREATE_SIMPLE_BLINKY_DEMO_ONLY == 1
-	extern void main_blinky( void );
-#else
-	extern void main_full( void );
-#endif /* #if mainCREATE_SIMPLE_BLINKY_DEMO_ONLY == 1 */
+/* todo: put function prototypes in header file. */
+extern void main_blinky( void );
+extern void main_full( void );
 
 /*
  * Prototypes for the standard FreeRTOS callback/hook functions implemented
@@ -103,24 +107,31 @@ static void prvSetupHardware( void );
  */
 static struct metal_led *pxBlueLED = NULL;
 
-/*-----------------------------------------------------------*/
 
 int main( void )
 {
 	prvSetupHardware();
 
-	pmp_initialization();
-
 	/* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
 	of this file. */
-	#if( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY == 1 )
+	#if( mainDEMO_SELECTION == 1 )
 	{
 		main_blinky();
 	}
-	#else
+	#elif ( mainDEMO_SELECTION == 2 )
 	{
 		main_full();
 	}
+	#elif ( mainDEMO_SELECTION == 3 )
+	{
+		pmp_demo_memory_violation_m_mode();
+	}
+	#elif ( mainDEMO_SELECTION == 4 )
+	{
+
+	}
+	#else
+		#error "Undefined demo case. Check mainDEMO_SELECTION."
 	#endif
 }
 /*-----------------------------------------------------------*/
