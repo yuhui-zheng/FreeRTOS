@@ -25,15 +25,55 @@
  * 1 tab == 4 spaces!
  */
 
-/* Initialize physical memory protection.
+/* Example PMP setting
  *
- * It is recommended to setup memory protection as early as possible, so
- * pmp_initialization() could be called either before loading kernel (bootloader)
- * or starting kernel scheduler.
+ * SiFive HiFive1 Rev1 B01 development board memory map partially looks like below.
  *
- * The helper functions provided are assuming RV32. The PMP settings are based
- * on provided linker script metal.pmp.lds.
+ * |-------------------|
+ * |    0x2000_0000    |
+ * |                   |    E31 ITIM (8 KiB)
+ * |    0x3FFF_FFFF    |    Attribute: Read, Write, eXecute, Atomics
+ * |-------------------|
+ * |                   |
+ * |      ......       |
+ * |                   |
+ * |-------------------|
+ * |    0x2000_0000    |
+ * |                   |    QSPI 0 Flash (512 MiB)
+ * |    0x3FFF_FFFF    |    Attribute: Read, eXecute, Cacheable
+ * |-------------------|
+ * |                   |
+ * |      ......       |
+ * |                   |
+ * |-------------------|
+ * |    0x8000_0000    |
+ * |                   |    E31 DTIM (16 KiB) (RAM)
+ * |    0x8000_FFFF    |    Attribute: Read, Write, eXecute, Atomics
+ * |-------------------|
+ *
+ * We'll use this map to discuss strategies to prevent common threats like
+ * code injection, data corruption, task execution environment isolation, and etc.
+ *
+ * This particular device has both M-mode and U-mode implemented.
+ * Though given RISC-V is an open ISA, two example configurations are given in
+ * this file --
+ * 1. an example configuration for devices with M-mode only.
+ * 2. an example configuration for devices with both M-mode and U-mode.
+ *
+ * For devices having M-mode only (usually simple embedded systems), the best one
+ * can do is probably to ensure not executing from RAM. Code can be placed in
+ * Flash, which memory range is usually with eXecute attribute but not Write attribute,
+ * and executed in place.
+ *
+ * For devices having both M-mode and U-mode (usually secure embedded systems),
+ * more can be done. Such as:
+ * - Each task stack can be guarded to allow access from the owning task only.
+ * - Task stacks are Read and Write only.
+ * - Tasks are executing in user mode, and kernel calls are made through call gate.
+ * This way, kernel is isolated from user, so that the attack surface is limited,
+ * and tasks are protected against corruption caused by other tasks.
  */
+
 
 /* FreeRTOS includes. */
 #include <FreeRTOS.h>
@@ -134,7 +174,32 @@ static void prvPmpAccessConfig( struct metal_pmp_config * xPmpConfigHandle,
 
 /*-----------------------------------------------------------*/
 
-void pmp_initialization( void )
+void pmp_initialization_M_mode_only( void )
+{
+	struct metal_pmp *pxPMP;
+	struct metal_pmp_config xPmpConfig;
+
+	size_t ulPmpBaseAddress;
+
+	int iStatus;
+
+	/* Setup physical memory protection. */
+	pxPMP = metal_pmp_get_device();
+	configASSERT( pxPMP );
+
+	metal_pmp_init( pxPMP );
+
+	/* Mark entire RAM region as R/W only, and lock it. So that the rule applies
+	 * to M-mode as well. */
+	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( 0x80000000, 0x4000 );
+	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_LOCKED, METAL_PMP_NAPOT, 0, 1, 1 );
+	iStatus = metal_pmp_set_region( pxPMP, 0, xPmpConfig, ulPmpBaseAddress );
+	configASSERT( iStatus == 0 );
+}
+
+/*-----------------------------------------------------------*/
+
+void pmp_initialization_U_mode_support( void )
 {
 struct metal_pmp *pxPMP;
 struct metal_pmp_config xPmpConfig;
@@ -147,6 +212,7 @@ extern uint32_t _privileged_data_start;
 extern uint32_t _privileged_function_start;
 extern uint32_t _common_function_start;
 extern uint32_t _common_data_end;
+//extern uint32_t _flash_end;
 
 
 	/* Since PMP setting is of security concern and done before kernel loading,
@@ -182,6 +248,11 @@ extern uint32_t _common_data_end;
 	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_LOCKED, METAL_PMP_NAPOT, 1, 0, 1 );
 	iStatus = metal_pmp_set_region( pxPMP, 1, xPmpConfig, ulPmpBaseAddress );
 	configASSERT( iStatus == 0 );
+
+	//ulPmpBaseAddress = prvFormatPmpAddrMatchTor( (size_t)&_flash_end );
+	//prvPmpAccessConfig( &xPmpConfig, METAL_PMP_LOCKED, METAL_PMP_TOR, 1, 0, 1 );
+	//iStatus = metal_pmp_set_region( pxPMP, 1, xPmpConfig, ulPmpBaseAddress );
+	//configASSERT( iStatus == 0 );
 
 	/* Kernel data:
 	Full access to M-mode, no access to U-mode.
