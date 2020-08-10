@@ -95,5 +95,39 @@ void pmp_demo_memory_violation_m_mode( void )
 
 void pmp_demo_memory_violation_u_mode( void )
 {
+	void (*pFn) (void) = (void (*)(void) )pxInstructionBuffer;
+	uint16_t uTemp;
 
+	BaseType_t xUserModeSupported;
+
+	/* Confirm U-mode is implemented on this MCU. */
+	xUserModeSupported = vPortIsUserModeSupported();
+	configASSERT( xUserModeSupported == pdTRUE );
+
+	/* Call function to increment global counter. */
+	prvIncGlobalCounter();
+
+	/* Execute from RAM is allowed before PMP initialization.
+	 * The global counter will be incremented by executing from RAM. */
+	pFn();
+
+	/* Initialize PMP. */
+	pmp_initialization_U_mode_support();
+	vPortInitInterruptHandler();
+
+	/* Drop privilege mode. PMP entries are configured, so only matching addresses
+	 * can be accessed from U-mode from now on. */
+	portSWITCH_TO_USER_MODE();
+
+	/* Function call is executed as normal. */
+	prvIncGlobalCounter();
+
+	/* Read/write access to RAM is allowed before task environment is setup.
+	 * Note that after scheduler starts, the PMP rule to allow access to RAM
+	 * shall be swapped with fine grained task stack only access. */
+	uTemp = pxInstructionBuffer[0];
+	pxInstructionBuffer[0] = 0;
+
+	/* To avoid unused variable warning. */
+	(void )uTemp;
 }
