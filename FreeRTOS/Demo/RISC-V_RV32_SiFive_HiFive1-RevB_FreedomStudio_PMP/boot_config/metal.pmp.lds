@@ -40,12 +40,8 @@ SECTIONS
 		KEEP (*(.text.libgloss.start))
 	} >flash AT>flash :flash
 
-	/* FreeRTOS kernel function.
-	   In v10.3.0, the size of this section is 0x4a2e bytes which rounds up to 0x8000. 
-	   Thus, set forced output alignment to 0x8000 bytes. 
-	   The start address of this section will be used in PMP initialization.
-	   todo: M-mode R/X access, U-mode no access.
-	*/
+	/* FreeRTOS kernel function. 
+	 * This section can be optionally configured with M-mode access only. */
 	.privileged_functions :		ALIGN(0x8000)
  	{
  		_privileged_function_start = .; 
@@ -55,21 +51,21 @@ SECTIONS
 		. = ALIGN(4);
 		FILL(0xDEAD);
 		/* Ensure that non-privileged code is placed after the region reserved for
-		 * privileged kernel code. */
+		 * privileged kernel code. */ 
 		. = ALIGN(0x8000);
 	} >flash AT>flash :flash
 
 
-	/* The 0x10000 alignment is to make .text region fit into a PMP address matching rule. 
-	   The options here:
-	   - use more than one PMP region, so that minimize flash fragmentation. 
-	     Note that there are only 8 PMP regions on fe310-g002.
-	   - use one PMP region, with the understanding that .privileged_functions and .text may not be contiguous. 
-	     The in between flash addresses are not used.
-	   In either case, every time software is modified, user needs to come back and reassess whetehr the configuration is still correct.
-	*/
-	.text 		:			ALIGN(0x10000)
+	/* Program code. 
+	 * U-mode shall have access to .text and .rodata section. */
+	.text 		:		ALIGN(0x10000)
 	{
+		/* Place the FreeRTOS System Calls first in the unprivileged region. */
+    	. = ALIGN(4);
+		__syscalls_flash_start__ = .;
+		*(freertos_system_calls)
+		__syscalls_flash_end__ = .;
+		. = ALIGN(4);
 		*(.text.unlikely .text.unlikely.*)
 		*(.text.startup .text.startup.*)
 		*(.text .text.*)
@@ -106,9 +102,6 @@ SECTIONS
 		*(.srodata.cst2)
 		*(.srodata .srodata.*)
 	} >flash AT>flash :flash
-
-
-	. = ALIGN(4);
 
 
 	.preinit_array 		:
@@ -181,11 +174,7 @@ SECTIONS
 
 
 	/* FreeRTOS kernel data. 
-	   In v10.3.0, the size of this section is 0x1a8 bytes which rounds up to 0x200.
-	   Thus set forced output alignment to 0x200 bytes. 
-	   The start address of this section will be used in PMP initialization.
-	   todo: M-mode R/W access, U-mode no access.
-	*/
+	 * This section can be optionally configured with M-mode access only. */
 	.privileged_data :		ALIGN(0x200)
 	{ 
 		*(privileged_data)
