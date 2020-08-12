@@ -128,6 +128,11 @@ void pmp_demo_memory_violation_u_mode( void )
 	uTemp = pxInstructionBuffer[0];
 	pxInstructionBuffer[0] = 0;
 
+	/* Access to M-mode CSR is now allowed in U-mode.
+	 * Execution will be trapped in interrupt handler set up above.*/
+	volatile uint32_t mstatus;
+	__asm volatile ( "csrr %0, mstatus" : "=r" ( mstatus ) );
+
 	/* To avoid unused variable warning. */
 	(void )uTemp;
 }
