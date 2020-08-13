@@ -190,9 +190,9 @@
 			<locationURI>FREERTOS_ROOT/FreeRTOS/Demo/Common/include</locationURI>
 		</link>
 		<link>
-			<name>FreeRTOS_Source/portable/Common/mpu_wrappers.c</name>
+			<name>FreeRTOS_Source/portable/Common/mpu_wrappers_prototype.c</name>
 			<type>1</type>
-			<locationURI>FREERTOS_ROOT/FreeRTOS/Source/portable/Common/mpu_wrappers.c</locationURI>
+			<locationURI>FREERTOS_ROOT/FreeRTOS/Source/portable/Common/mpu_wrappers_prototype.c</locationURI>
 		</link>
 		<link>
 			<name>FreeRTOS_Source/portable/MemMang/heap_4.c</name>

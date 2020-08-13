@@ -71,7 +71,7 @@
  *
  * 3 and 4 are separated from regular demo to show the exception paths.
  */
-#define mainDEMO_SELECTION	3
+#define mainDEMO_SELECTION	1
 
 /* Index to first HART (there is only one). */
 #define mainHART_0 		0
@@ -110,12 +110,27 @@ static struct metal_led *pxBlueLED = NULL;
 
 int main( void )
 {
+BaseType_t xUserModeSupported;
+
 	prvSetupHardware();
 
 	/* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
 	of this file. */
 	#if( mainDEMO_SELECTION == 1 )
-	{
+	{	/* Confirm user mode is supported. */
+		xUserModeSupported = vPortIsUserModeSupported();
+		configASSERT( xUserModeSupported == pdTRUE );
+
+		/* Initialize PMP and interrupt handler before dropping privilege,
+		 * as M-mode registers are only accessible from M-mode. */
+		pmp_initialization_U_mode_support();
+		vPortInitInterruptHandler();
+
+		/* Drop mode to U-mode.
+		 * From now on user code shall only have access to stack and none privilege
+		 * code. */
+		portSWITCH_TO_USER_MODE();
+
 		main_blinky();
 	}
 	#elif ( mainDEMO_SELECTION == 2 )
@@ -128,7 +143,7 @@ int main( void )
 	}
 	#elif ( mainDEMO_SELECTION == 4 )
 	{
-
+		pmp_demo_memory_violation_u_mode();
 	}
 	#else
 		#error "Undefined demo case. Check mainDEMO_SELECTION."
