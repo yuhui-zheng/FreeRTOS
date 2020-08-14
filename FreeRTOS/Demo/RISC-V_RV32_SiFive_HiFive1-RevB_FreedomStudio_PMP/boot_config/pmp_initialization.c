@@ -210,6 +210,7 @@ uint32_t ulSize;
 int iStatus;
 
 extern uint32_t _common_function_start;
+extern uint32_t _privileged_function_start;
 
 	/* Since PMP setting is of security concern and done before kernel loading,
 	 * assert on any error. */
@@ -220,17 +221,26 @@ extern uint32_t _common_function_start;
 
 	metal_pmp_init( pxPMP );
 
+	/* Reserve a slot to access .privileged_functions.
+	 * When calls are made through call gate, allow the thread access to FreeRTOS
+	 * APIs. */
+	ulSize = 0x8000;
+	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( (size_t)&_privileged_function_start, ulSize);
+	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_UNLOCKED, METAL_PMP_NAPOT, 0, 0, 0 );
+	iStatus = metal_pmp_set_region( pxPMP, 0, xPmpConfig, ulPmpBaseAddress );
+	configASSERT( iStatus == 0 );
+
 	/* Grant U-mode access to .text section.
 	 * FreeRTOS kernel API call gates are located at the beginning of .text --
 	 * [__syscalls_flash_start__, __syscalls_flash_end__], where U-mode has access
 	 * to. FreeRTOS kernel API implementations are in a separate section
 	 * .privileged_functions -- [_privileged_function_start, +0x8000], where U-mode
-	 * does not have access to. Privilege is bumped only for API calls made through
-	 * call gate. */
+	 * does not have access to by default. Privilege is bumped only for API calls
+	 * made through call gate. */
 	ulSize = 0x10000;
 	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( (size_t)&_common_function_start, ulSize);
 	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_UNLOCKED, METAL_PMP_NAPOT, 1, 0, 1 );
-	iStatus = metal_pmp_set_region( pxPMP, 0, xPmpConfig, ulPmpBaseAddress );
+	iStatus = metal_pmp_set_region( pxPMP, 1, xPmpConfig, ulPmpBaseAddress );
 	configASSERT( iStatus == 0 );
 
 	/* Temporary grant U-mode access to entire RAM.
@@ -238,7 +248,7 @@ extern uint32_t _common_function_start;
 	ulSize = 0x4000;
 	ulPmpBaseAddress = prvFormatPmpAddrMatchNapot( 0x80000000, ulSize );
 	prvPmpAccessConfig( &xPmpConfig, METAL_PMP_UNLOCKED, METAL_PMP_NAPOT, 0, 1, 1 );
-	iStatus = metal_pmp_set_region( pxPMP, 1, xPmpConfig, ulPmpBaseAddress );
+	iStatus = metal_pmp_set_region( pxPMP, 2, xPmpConfig, ulPmpBaseAddress );
 	configASSERT( iStatus == 0 );
 
 }
