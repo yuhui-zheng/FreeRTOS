@@ -229,6 +229,11 @@
 			<type>1</type>
 			<locationURI>FREERTOS_ROOT/FreeRTOS/Source/portable/GCC/RISC-V/chip_specific_extensions/RV32I_PMP_register_extensions/freertos_risc_v_chip_specific_extensions.h</locationURI>
 		</link>
+		<link>
+			<name>FreeRTOS_Source/portable/RISC-V/chip_specific_extensions/RV32I_PMP_register_extensions/freertos_risc_v_syscall_number.h</name>
+			<type>1</type>
+			<locationURI>FREERTOS_ROOT/FreeRTOS/Source/portable/GCC/RISC-V/chip_specific_extensions/RV32I_PMP_register_extensions/freertos_risc_v_syscall_number.h</locationURI>
+		</link>
 	</linkedResources>
 	<filteredResources>
 		<filter>
