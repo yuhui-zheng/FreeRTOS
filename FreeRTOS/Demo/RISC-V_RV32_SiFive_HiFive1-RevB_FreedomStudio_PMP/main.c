@@ -126,6 +126,11 @@ BaseType_t xUserModeSupported;
 		pmp_initialization_U_mode_support();
 		vPortInitInterruptHandler();
 
+		/* Drop mode to U-mode.
+		 * From now on user code shall only have access to stack and none privilege
+		 * code. */
+		portSWITCH_TO_USER_MODE();
+
 		main_blinky();
 	}
 	#elif ( mainDEMO_SELECTION == 2 )
